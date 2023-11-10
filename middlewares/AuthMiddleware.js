@@ -24,7 +24,7 @@ const getUserId = (authorization) => {
         user.error.status = 403;
         user.error.message = "Invalid token.";
       } else {
-        user.id = data.id;
+        user.token = data;
         user.error = null
       }
     });
@@ -34,24 +34,24 @@ const getUserId = (authorization) => {
 }
 
 const isAuthenticated = (req, res, next) => {
-  const { id, error } = getUserId(req.headers["authorization"]);
+  const { token, error } = getUserId(req.headers["authorization"]);
   if (error) {
     return res.status(error.status).json({ message: error.message, status: "KO" });
   }
-  req.userId = id;
+  req.token = token;
   next();
 };
 
 const isAdmin = asyncHandler(async (req, res, next) => {
-  const { id, error } = getUserId(req.headers["authorization"]);
+  const { token, error } = getUserId(req.headers["authorization"]);
   if (error) {
     return res.status(error.status).json({ message: error.message, status: "KO" });
   }
 
-  const user = await User.findById(id);
+  const user = await User.findById(token.id);
 
   if (user?.isAdmin) {
-    req.userId = id;
+    req.token = token;
     next();
   } else {
     return res.status(403).json({ message: 'Requires admin access' });
