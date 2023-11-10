@@ -82,7 +82,7 @@ const getAll = asyncHandler(async (req, res) => {
 
 const getProfile = asyncHandler(async (req, res) => {
   try {
-    const userId = req.userId
+    const userId = req.token.id
     const user = await User.findById(userId);
     if (user) {
       res.status(200).json({
