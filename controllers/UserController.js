@@ -4,7 +4,7 @@ const jwt = require("../utils/jwt");
 
 const register = asyncHandler(async (req, res) => {
   try {
-    const { fullname, email, password, image } = req.body;
+    const { fullname, email, password, image, isAdmin } = req.body;
 
     if (!fullname || !email || !password) {
       res
@@ -23,6 +23,7 @@ const register = asyncHandler(async (req, res) => {
       email,
       password,
       image,
+      isAdmin
     });
 
     if (newUser) {
@@ -84,7 +85,16 @@ const getProfile = asyncHandler(async (req, res) => {
     const userId = req.userId
     const user = await User.findById(userId);
     if (user) {
-      res.status(200).json({user});
+      res.status(200).json({
+        user: {
+          _id: user._id,
+          fullname: user.fullname,
+          email: user.email,
+          isAdmin: user.isAdmin,
+          image: user.image,
+        },
+        token: jwt.generate(user._id)
+      });
     } else {
       res.status(404).json({ message: "The user not found!", status: "KO" });
     }
