@@ -132,4 +132,21 @@ const editProfile = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = { register, login, getAll, getProfile, editProfile };
+const deleteProfile = asyncHandler(async (req, res) => {
+  const userId = req.token.id;
+
+  try {
+    const result = await User.deleteOne({ _id: userId });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: `User with id : '${userId}' is not found"` });
+    }
+
+    res.json({ message: 'User deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: `Internal server error : ${error.message} ` });
+  }
+});
+
+module.exports = { register, login, getAll, getProfile, editProfile, deleteProfile };
