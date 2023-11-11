@@ -1,0 +1,9 @@
+name: John Doe
+age: 30
+city: New York
+isStudent: false
+grades:
+  - subject: Math
+    score: 95
+  - subject: English
+    score: 88
