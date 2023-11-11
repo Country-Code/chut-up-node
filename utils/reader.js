@@ -1,11 +1,14 @@
 const fs = require('fs');
-const yaml = require('js-yaml');
+const jsyaml = require('js-yaml');
 
 function yaml(filePath) {
   try {
     const yamlFileContent = fs.readFileSync(filePath, 'utf8');
 
-    const data = yaml.load(yamlFileContent);
+    let data = jsyaml.load(yamlFileContent);
+    if (data === undefined) {
+      data = {}
+    }
     return data;
   } catch (error) {
     console.log(`Error reading YAML file: ${error.message}`);
