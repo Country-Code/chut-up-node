@@ -103,4 +103,33 @@ const getProfile = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = { register, login, getAll, getProfile };
+const editProfile = asyncHandler(async (req, res) => {
+  const userId = req.token.id;
+
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: `User with id : '${userId}' is not found"` });
+    }
+
+    if (req.body.fullname) user.fullname = req.body.fullname;
+    if (req.body.email) user.email = req.body.email;
+    if (req.body.password) user.password = req.body.password;
+    if (req.body.image) user.image = req.body.image;
+    if (req.body.isAdmin !== undefined) user.isAdmin = req.body.isAdmin;
+
+    const updatedUser = await user.save();
+
+    res.json({
+      message: "Profile updated successfully",
+      user: updatedUser,
+      token: jwt.generate(user._id),
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error", status: "KO" });
+  }
+});
+
+module.exports = { register, login, getAll, getProfile, editProfile };
