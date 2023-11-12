@@ -35,4 +35,16 @@ function logReq(req) {
     }
 }
 
-module.exports = { loadModule, loadModuleMethod, extractFieldsFromRequestBody, logReq }
+const getMiddlewaresFromConfig = (entityName) => {
+    const reader = require('./reader');
+    const path = require('path');
+    
+    const middlewaresConfigFilePath = path.resolve(__dirname, "../config/middlewares.yaml")
+    
+    const middlewaresConfig = reader.yaml(middlewaresConfigFilePath)
+    let routerMiddlewares = []
+    if (middlewaresConfig) routerMiddlewares = middlewaresConfig[entityName] ?? []
+    return routerMiddlewares
+}
+
+module.exports = { loadModule, loadModuleMethod, extractFieldsFromRequestBody, logReq, getMiddlewaresFromConfig }
