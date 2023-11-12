@@ -1,0 +1,6 @@
+chats:
+  - method: put
+    path: /:id
+    middlewares:
+      - module: "./middlewares/AuthMiddleware"
+        middleware: isAdmin
