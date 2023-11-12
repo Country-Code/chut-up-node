@@ -91,8 +91,16 @@ function getCRUDController(model) {
   };
 }
 
-function getCRUDRouter(controller) {
+function getCRUDRouter(controller, entityName) {
+  const routerMiddlewares = tools.getMiddlewaresFromConfig(entityName)
   const router = express.Router();
+
+  routerMiddlewares.forEach(({ method, path, middlewares }) => {
+    const routeMiddlewares = middlewares.map(({ module, middleware }) => {
+      return tools.loadModuleMethod(module, middleware);
+    });
+    router[method.toLowerCase()](path, ...routeMiddlewares);
+  });
 
   // Get all documents
   if (
