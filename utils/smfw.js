@@ -1,28 +1,16 @@
 const mongoose = require('mongoose');
 const express = require('express');
 const asyncHandler = require("express-async-handler");
-
-const extractFieldsFromRequestBody = (reqBody, schema) => {
-  const allowedFields = Object.keys(schema.paths);
-  const extractedFields = {};
-
-  allowedFields.forEach((field) => {
-    if (reqBody[field] !== undefined) {
-      extractedFields[field] = reqBody[field];
-    }
-  });
-
-  return extractedFields;
-};
+const tools = require('./tools');
 
 function getCRUDController(model) {
   return {
     // Create a new document
     create: asyncHandler(async (req, res) => {
       const reqBody = req.body;
-      const fields = extractFieldsFromRequestBody(reqBody, model.schema);
+      const itemData = tools.extractFieldsFromRequestBody(reqBody, model.schema);
       try {
-        const data = await model.create(fields);
+        const data = await model.create(itemData);
         res.status(201).json({
           data,
         //   jwt: req.jwt,
@@ -67,11 +55,12 @@ function getCRUDController(model) {
 
     // Update a document by ID
     updateById: async (req, res) => {
+      const reqBody = req.body;
       const itemId = req.params.id;
-      const data = req.body;
+      const itemData = tools.extractFieldsFromRequestBody(reqBody, model.schema);
 
       try {
-        const updatedDocument = await model.findByIdAndUpdate(itemId, data, {
+        const updatedDocument = await model.findByIdAndUpdate(itemId, itemData, {
           new: true,
         });
         if (!updatedDocument) {
