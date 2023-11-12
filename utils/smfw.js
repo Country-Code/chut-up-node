@@ -82,7 +82,9 @@ function getCRUDController(model) {
         if (!deletedDocument) {
           return res.status(404).json({ message: "Document not found" });
         }
-        res.status(204).send();
+        res
+          .status(204)
+          .json({ message: 'The ressource has been deleted successfully' });
       } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Internal server error" });
