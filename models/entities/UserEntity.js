@@ -34,6 +34,12 @@ module.exports = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    resetPasswordToken: {
+      type: "String"
+    },
+    resetPasswordTokenExpires:  {
+      type: "Date"
+    },
   },
   { timestaps: true }
 );

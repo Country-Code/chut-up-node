@@ -7,6 +7,16 @@ userEntity.methods.verifyPassword = async function (pw) {
   return await bcrypt.compare(pw, this.password);
 };
 
+userEntity.methods.createResetPasswordToken = async function (pw) {
+  const token = crypto.randomUUID()
+  this.resetPasswordToken = token;
+  this.resetPasswordTokenExpires = Date.now() + 1000 * 60 * 60;
+
+  console.log(token, this.resetPasswordTokens)
+
+  return token;
+};
+
 userEntity.pre("save", async function (next) {
   if (!this.isModified) {
     next();
