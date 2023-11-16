@@ -10,6 +10,12 @@ const example = (req, res) => {
     res.json({message, data})
 }
 
+const errorAction = (req, res) => {
+    res.status(444)
+    throw new Error("error message");
+}
+
 router.route("/example").post(example);
+router.route("/error").post(errorAction);
 
 module.exports = router;
