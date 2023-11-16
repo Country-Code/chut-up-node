@@ -47,7 +47,7 @@ const editProfile = asyncHandler(async (req, res) => {
 
     if (req.body.fullname) user.fullname = req.body.fullname;
     if (req.body.email) user.email = req.body.email;
-    if (req.body.password) user.password = req.body.password;
+    if (req.body.password) await user.setPassword(req.body.password);
     if (req.body.image) user.image = req.body.image;
     if (req.body.isAdmin !== undefined) user.isAdmin = req.body.isAdmin;
 

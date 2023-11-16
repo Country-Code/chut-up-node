@@ -20,13 +20,15 @@ const register = asyncHandler(async (req, res) => {
       res.status(400).json({ message: "User already exists", status: "KO" });
     }
 
-    const newUser = await User.create({
+    const newUser = await new User({
       fullname,
       email,
       password,
       image,
       isAdmin
     });
+    await newUser.setPassword(password);
+    await newUser.save();
 
     if (newUser) {
       res.status(201).json({
@@ -92,7 +94,7 @@ const resetPasswordRequest = asyncHandler(async (req, res) => {
     },(err) => {
       user.cleanResetPasswordData()
       throw err;
-    },(data) => {
+    },() => {
       res.json({ message: `Password reset mail is sent to ${user.email}`, email: user.email, status: "SUCCESS" });
     })
   } catch (error) {
@@ -117,12 +119,12 @@ const resetPasswordAction = asyncHandler(async (req, res) => {
     if (!newPassword) {
       return res.status(400).json({ message: `The new password is required!.` });
     }
-    user.password = newPassword;
-    user.cleanResetPasswordData()
+    await user.setPassword(newPassword);
+    await user.cleanResetPasswordData();
     res.json({ message: 'Password reseted successfully' });
 
   } catch (error) {
-    throw error;
+    throw new Error(`Error while reseting password : ${error.meassage}`);
   }
 });
 

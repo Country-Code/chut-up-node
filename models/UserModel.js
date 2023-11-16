@@ -24,13 +24,9 @@ userEntity.methods.cleanResetPasswordData = async function () {
   return true;
 };
 
-userEntity.pre("save", async function (next) {
-  if (!this.isModified) {
-    next();
-  }
-
+userEntity.methods.setPassword = async function (pw) {
   const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-});
+  this.password = await bcrypt.hash(pw, salt);
+}
 
 module.exports = mongoose.model("User", userEntity);
