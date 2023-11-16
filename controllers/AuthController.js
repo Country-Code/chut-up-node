@@ -79,37 +79,51 @@ const resetPasswordRequest = asyncHandler(async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(404).json({ message: `User with email : '${email}' is not found"` });
+      return res.status(404).json({ message: `User with email '${email}' is not found.` });
     }
-    let token = user.createResetPasswordToken()
-    letResetUrl = `${req.protocol}://${req.get('host')}/api/auth/resetPassword/${token}`
-    await user.save()
+    let token = await user.createResetPasswordToken()
+    console.log("token is :", token)
+    console.log("typeof token is :", typeof token)
+    let resetUrl = `${req.protocol}://${req.get('host')}/api/auth/reset-password/${token}`
+    console.log("resetUrl is :", resetUrl)
     mailer.sendMail({
         to: user.email,
-        html: '<a href="">Change password</a>'
+        html: `<a href="${resetUrl}">Change password</a>`
+    },(err) => {
+      user.cleanResetPasswordData()
+      throw err;
+    },(data) => {
+      res.json({ message: `Password reset mail is sent to ${user.email}`, email: user.email, status: "SUCCESS" });
     })
-    res.json({ user });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: `Internal server error : ${error.message} ` });
+    res.status(500);
+    throw error;
   }
 });
 
 const resetPasswordAction = asyncHandler(async (req, res) => {
-  const {email} = req.body;
+  const {newPassword, resetPasswordToken } = req.body;
 
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ resetPasswordToken });
 
     if (!user) {
-      return res.status(404).json({ message: `User with email : '${email}' is not found"` });
+      return res.status(404).json({ message: `No User with this resetPasswordToken : '${resetPasswordToken}'.` });
     }
+    if (user.resetPasswordTokenExpires < Date.now()) {
+      return res.status(400).json({ message: `The resetPasswordToken is expired.` });
+    }
+    
+    if (!newPassword) {
+      return res.status(400).json({ message: `The new password is required!.` });
+    }
+    user.password = newPassword;
+    user.cleanResetPasswordData()
+    res.json({ message: 'Password reseted successfully' });
 
-    res.json({ message: 'User deleted successfully' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: `Internal server error : ${error.message} ` });
+    throw error;
   }
 });
 
-module.exports = { register, login, resetPasswordRequest};
+module.exports = { register, login, resetPasswordRequest, resetPasswordAction};
