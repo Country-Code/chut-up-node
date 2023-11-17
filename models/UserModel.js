@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
-
+const crypto = require('crypto');
 const userEntity = require("./entities/UserEntity");
 
 userEntity.methods.verifyPassword = async function (pw) {
