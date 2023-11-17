@@ -3,7 +3,7 @@ const chatRouter = require("./router/ChatRouter")
 const authRouter = require("./router/AuthRouter")
 const testRouter = require("./router/TestRouter")
 const tools = require("./utils/tools")
-const { errorHandler, notFoundHandler } = require("./middlewares/ErrorMiddleware")
+const { errorHandler, notFoundHandler } = require("./middlewares/errorMiddleware")
 
 const express = require('express')
 const app = express()
