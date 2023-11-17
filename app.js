@@ -6,7 +6,10 @@ const tools = require("./utils/tools")
 const { errorHandler, notFoundHandler } = require("./middlewares/errorMiddleware")
 
 const express = require('express')
-const app = express()
+const cors = require('cors');
+
+const app = express();
+app.use(cors({origin: "*"}));
 app.use(express.json());
 
 app.all("*", (req, res, next) => {
