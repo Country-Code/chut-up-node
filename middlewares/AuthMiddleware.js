@@ -2,39 +2,35 @@ const asyncHandler = require("express-async-handler");
 const User = require("../models/UserModel");
 const jwt = require("jsonwebtoken");
 
-const getUserId = (authorization) => {
-  let user = { error: {}, id: null }
-  let token= "";
+const getUserDataFromJWT = (authorization) => {
+  let data = { error: {}, token: null }
+  let token;
 
-  if (authorization?.startsWith('Bearer ')) {
+  if (!authorization?.startsWith('Bearer ')) {
+    data.error.status = 400;
+    data.error.message = "Invalid Bearer authorization.";
+  } else {
     token = authorization.split(' ')[1];
-  } else {
-    user.error.status = 400;
-    user.error.message = "Invalid Bearer authorization.";
-    return user;
+    if (token === undefined) {
+      data.error.status = 401;
+      data.error.message = "Access denied. No token provided.";
+    } else {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
+        if (err) {
+          data.error.status = 403;
+          data.error.message = err.message;
+        } else {
+          data.token = {id: decodedToken.id, roles: decodedToken.roles};
+          data.error = null
+        }
+      });
+    }
   }
-
-  if (token === undefined) {
-    user.error.status = 401;
-    user.error.message = "Access denied. No token provided.";
-    return user;
-  } else {
-    jwt.verify(token, process.env.JWT_SECRET, (err, data) => {
-      if (err) {
-        user.error.status = 403;
-        user.error.message = "Invalid token.";
-      } else {
-        user.token = data;
-        user.error = null
-      }
-    });
-    return user;
-  }
-
+  return data;
 }
 
 const isAuthenticated = (req, res, next) => {
-  const { token, error } = getUserId(req.headers["authorization"]);
+  const { token, error } = getUserDataFromJWT(req.headers["authorization"] || req.headers["Authorization"]);
   if (error) {
     return res.status(error.status).json({ message: error.message, status: "KO" });
   }
@@ -43,7 +39,7 @@ const isAuthenticated = (req, res, next) => {
 };
 
 const isAdmin = asyncHandler(async (req, res, next) => {
-  const { token, error } = getUserId(req.headers["authorization"]);
+  const { token, error } = getUserDataFromJWT(req.headers["authorization"]);
   if (error) {
     return res.status(error.status).json({ message: error.message, status: "KO" });
   }

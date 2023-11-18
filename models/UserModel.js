@@ -29,4 +29,13 @@ userEntity.methods.setPassword = async function (pw) {
   this.password = await bcrypt.hash(pw, salt);
 }
 
+userEntity.methods.setRoles = async function (roles) {
+  if (Array.isArray(roles) && roles.length > 0) {
+    this.roles = [...(new Set(roles))]
+  } else if (!Array.isArray(roles)) {
+    this.roles = roles;
+  }
+}
+
+
 module.exports = mongoose.model("User", userEntity);

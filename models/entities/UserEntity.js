@@ -1,4 +1,8 @@
 const mongoose = require("mongoose");
+const rolesList = require("../../config/roles")
+const rolesSchema = new mongoose.Schema(
+  { value: {type: String, enum: [...rolesList] }}
+);
 
 module.exports = mongoose.Schema(
   {
@@ -30,9 +34,21 @@ module.exports = mongoose.Schema(
       default:
         "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg",
     },
-    isAdmin: {
-      type: Boolean,
-      default: false,
+    roles: {
+      type: [{type: String, refs: rolesSchema}],
+      default: [rolesList?.[0]],
+      validate: {
+        validator: function(roles) {
+          let uniqueRoles = [...(new Set(roles))]
+          return uniqueRoles
+            .map(
+              role => rolesList.includes(role)
+            ).filter(
+              included => included === false
+            ).length === 0;
+        },
+        message: props => `The given value '${props.value}' includes invalid roles!`
+      }
     },
     resetPasswordToken: {
       type: "String"
