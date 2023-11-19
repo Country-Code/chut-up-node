@@ -1,17 +1,34 @@
 const fs = require('fs');
+const jsyaml = require('js-yaml');
 
 const smfs = {
-    fileExists: function (filePath) {
-        try {
-            fs.accessSync(filePath, fs.constants.F_OK);
-            return true;
-        } catch (err) {
-            console.log(err);
-            return false;
-        }
+    file: {
+        exists: function (filePath, ext = ".js") {
+            let completFilePath=  filePath + ext;
+            try {
+                fs.accessSync(completFilePath, fs.constants.F_OK);
+                return true;
+            } catch (err) {
+                console.log(err);
+                return false;
+            }
+        },
     },
-    jsFileExists: function (filePath) {
-        return this.fileExists(filePath + ".js")
+    read: {
+        yaml: function (filePath) {
+            try {
+              const yamlFileContent = fs.readFileSync(filePath, 'utf8');
+          
+              let data = jsyaml.load(yamlFileContent);
+              if (data === undefined) {
+                data = {}
+              }
+              return data;
+            } catch (error) {
+              console.log(`Error reading YAML file: ${error.message}`);
+              return null;
+            }
+        },
     }
 }
 
