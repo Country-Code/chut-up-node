@@ -1,6 +1,6 @@
 chats:
-  - method: put
-    path: /:id
+  - method: post
+    path: /
     middlewares:
       - module: "./middlewares/AuthMiddleware"
-        middleware: isAdmin
+        middleware: isAuthenticated
