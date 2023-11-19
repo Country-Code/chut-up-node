@@ -1,4 +1,7 @@
 const path = require('path');
+const logger = require("./tools/logger");
+const date = require("./tools/date");
+const fs = require("./tools/fs");
 
 const extractFieldsFromRequestBody = (reqBody, schema) => {
     const allowedFields = Object.keys(schema.paths);
@@ -14,14 +17,19 @@ const extractFieldsFromRequestBody = (reqBody, schema) => {
 };
 
 function loadModule(module) {
-    const moduleContent = require(module);
-    return moduleContent
+    const modulePath = path.resolve(__dirname, "../", module)
+    if (fs.jsFileExists(modulePath)) {
+        const moduleContent = require(modulePath);
+        return moduleContent
+    }
 }
 
 function loadModuleMethod(module, method) {
-    const modulePath = path.resolve(__dirname, "../", module)
-    const methodContent = require(modulePath)[method];
-    return methodContent
+    const moduleContent = loadModule(module)
+    if (moduleContent) {
+        const methodContent = moduleContent[method] ?? null;
+        return methodContent
+    }
 }
 
 function logReq(req) {
@@ -47,4 +55,5 @@ const getMiddlewaresFromConfig = (entityName) => {
     return routerMiddlewares
 }
 
-module.exports = { loadModule, loadModuleMethod, extractFieldsFromRequestBody, logReq, getMiddlewaresFromConfig }
+
+module.exports = { date, logger, fs, loadModule, loadModuleMethod, extractFieldsFromRequestBody, logReq, getMiddlewaresFromConfig}

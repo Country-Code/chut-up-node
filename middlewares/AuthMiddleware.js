@@ -1,61 +1,81 @@
 const asyncHandler = require("express-async-handler");
-const User = require("../models/UserModel");
 const jwt = require("jsonwebtoken");
+const {logger} = require('../utils/tools');
 
-const getUserId = (authorization) => {
-  let user = { error: {}, id: null }
-  let token= "";
+const getUserDataFromJWT = (authorization) => {
+  let data = { error: {}, user: null }
+  let token;
 
-  if (authorization?.startsWith('Bearer ')) {
+  if (!authorization?.startsWith('Bearer ')) {
+    data.error.status = 400;
+    data.error.message = "Invalid Bearer authorization.";
+  } else {
     token = authorization.split(' ')[1];
-  } else {
-    user.error.status = 400;
-    user.error.message = "Invalid Bearer authorization.";
-    return user;
+    if (token === undefined) {
+      data.error.status = 401;
+      data.error.message = "Access denied. No token provided.";
+    } else {
+      jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
+        if (err) {
+          data.error.status = 403;
+          data.error.message = err.message;
+        } else {
+          logger.log().log(decodedToken, "getUserDataFromJWT decodedToken");
+          data.user = {id: decodedToken._id, roles: decodedToken.roles};
+          data.error = null
+        }
+      });
+    }
   }
-
-  if (token === undefined) {
-    user.error.status = 401;
-    user.error.message = "Access denied. No token provided.";
-    return user;
-  } else {
-    jwt.verify(token, process.env.JWT_SECRET, (err, data) => {
-      if (err) {
-        user.error.status = 403;
-        user.error.message = "Invalid token.";
-      } else {
-        user.token = data;
-        user.error = null
-      }
-    });
-    return user;
-  }
-
+          logger.log().log(data, "getUserDataFromJWT data");
+  return data;
 }
 
 const isAuthenticated = (req, res, next) => {
-  const { token, error } = getUserId(req.headers["authorization"]);
+  const { user, error } = getUserDataFromJWT(req.headers["authorization"] || req.headers["Authorization"]);
   if (error) {
-    return res.status(error.status).json({ message: error.message, status: "KO" });
+    res.status(error.status)
+    throw new Error(error.message);
   }
-  req.token = token;
+  req.user = user;
   next();
 };
 
-const isAdmin = asyncHandler(async (req, res, next) => {
-  const { token, error } = getUserId(req.headers["authorization"]);
-  if (error) {
-    return res.status(error.status).json({ message: error.message, status: "KO" });
-  }
-
-  const user = await User.findById(token.id);
-
-  if (user?.isAdmin) {
-    req.token = token;
+const verifyOneRole = (...allowedRoles) => {
+  return (req, res, next) => {
+    const { user, error } = getUserDataFromJWT(req.headers["authorization"] || req.headers["Authorization"]);
+    if (error) {
+      res.status(error.status)
+      throw new Error(error.message);
+    }
+    const allowedRolesArray = [...allowedRoles];
+    const isAllowed = user.roles.map(role => allowedRolesArray.includes(role)).find(val => val === true);
+    if (!isAllowed) {
+      res.status(401)
+      throw new Error('Required roles missed!');
+    }
     next();
-  } else {
-    return res.status(403).json({ message: 'Requires admin access' });
   }
-})
+}
 
-module.exports = { isAuthenticated, isAdmin };
+const verifyAllRoles = (...allowedRoles) => {
+  return (req, res, next) => {
+    const { user, error } = getUserDataFromJWT(req.headers["authorization"] || req.headers["Authorization"]);
+    if (error) {
+      res.status(error.status)
+      throw new Error(error.message);
+    }
+    const allowedRolesArray = [...allowedRoles];
+    const isDenied = allowedRolesArray.map(role => !user.roles.includes(role)).find(val => val === true);
+    logger.log().log(`verifyAllRoles allowedRolesArray : ${allowedRolesArray}`);
+    console.log("verifyAllRoles user.roles : ", user.roles);
+    console.log("verifyAllRoles result : ", isDenied);
+    if (isDenied) {
+      res.status(401)
+      throw new Error('At least one of the required roles missed!');
+    }
+    next();
+  }
+}
+
+module.exports = { isAuthenticated, verifyOneRole, verifyAllRoles };

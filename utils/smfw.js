@@ -5,90 +5,60 @@ const tools = require('./tools');
 
 function getCRUDController(model) {
   return {
-    // Create a new document
     create: asyncHandler(async (req, res) => {
       const reqBody = req.body;
       const itemData = tools.extractFieldsFromRequestBody(reqBody, model.schema);
-      try {
-        const data = await model.create(itemData);
-        res.status(201).json({
-          data,
-        //   jwt: req.jwt,
-        });
-      } catch (error) {
-        console.error(error);
-        res.status(500);
-        throw error;
-      }
+      const data = await model.create(itemData);
+      res.status(201).json({
+        data,
+      });
     }),
 
-    // Get all documents
     getAll: asyncHandler(async (req, res) => {
-      try {
-        const data = await model.find();
-        res.status(200).json({
-          data,
-        //   jwt: req.jwt,
-        });
-      } catch (error) {
-        console.error(error);
-        res.status(500);
-        throw error;
-      }
+      const data = await model.find();
+      res.status(200).json({
+        data,
+      });
     }),
 
-    // Get a document by ID
     getById: async (req, res) => {
       const itemId = req.params.id;
 
-      try {
-        const document = await model.findById(itemId);
-        if (!document) {
-          return res.status(404).json({ message: "Document not found" });
-        }
-        res.json(document);
-      } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Internal server error" });
+      const document = await model.findById(itemId);
+      if (!document) {
+        res.status(404);
+        throw new Error(`Document with ${itemId} not found!`);
       }
+      res.json(document);
     },
 
-    // Update a document by ID
     updateById: async (req, res) => {
       const reqBody = req.body;
       const itemId = req.params.id;
       const itemData = tools.extractFieldsFromRequestBody(reqBody, model.schema);
 
-      try {
-        const updatedDocument = await model.findByIdAndUpdate(itemId, itemData, {
-          new: true,
-        });
-        if (!updatedDocument) {
-          return res.status(404).json({ message: "Document not found" });
-        }
-        res.json(updatedDocument);
-      } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Internal server error" });
+      const updatedDocument = await model.findByIdAndUpdate(itemId, itemData, {
+        new: true,
+      });
+      if (!updatedDocument) {
+        res.status(404);
+        throw new Error(`Document with ${itemId} not found!`);
       }
+      res.json(updatedDocument);
     },
 
-    // Delete a document by ID
     deleteById: async (req, res) => {
       const itemId = req.params.id;
 
-      try {
-        const deletedDocument = await model.findByIdAndDelete(itemId);
-        if (!deletedDocument) {
-          return res.status(404).json({ message: "Document not found" });
-        }
-        res
-          .status(204)
-          .json({ message: 'The ressource has been deleted successfully' });
-      } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Internal server error" });
+      const deletedDocument = await model.findByIdAndDelete(itemId);
+      if (!deletedDocument) {
+        res.status(404);
+        throw new Error(`Document with ${itemId} not found!`);
       }
+      res
+        .status(204)
+        .json({ message: 'The ressource has been deleted successfully' });
+
     },
   };
 }
@@ -99,8 +69,11 @@ function getCRUDRouter(controller, entityName) {
 
   routerMiddlewares.forEach(({ method, path, middlewares }) => {
     const routeMiddlewares = middlewares.map(({ module, middleware }) => {
-      return tools.loadModuleMethod(module, middleware);
-    });
+      let newMiddleware = tools.loadModuleMethod(module, middleware);
+      if (!newMiddleware) console.log(`Warning : Routing for "${entityName}" can't add the middleware "${module}->${middleware}" for "${method}.(${path})"!`)
+      return newMiddleware;
+    }).filter(middleware => middleware !== null);
+
     router[method.toLowerCase()](path, ...routeMiddlewares);
   });
 

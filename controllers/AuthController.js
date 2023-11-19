@@ -6,7 +6,7 @@ const mailer = require("../config/mailer")
 
 const register = asyncHandler(async (req, res) => {
   try {
-    const { fullname, email, password, image, isAdmin } = req.body;
+    const { fullname, email, password, image, roles } = req.body;
 
     if (!fullname || !email || !password) {
       res
@@ -24,22 +24,22 @@ const register = asyncHandler(async (req, res) => {
       fullname,
       email,
       password,
-      image,
-      isAdmin
+      image
     });
     await newUser.setPassword(password);
+    if (roles) await newUser.setRoles(roles);
     await newUser.save();
-
+    let token = jwt.generate(newUser);
     if (newUser) {
       res.status(201).json({
         user: {
           _id: newUser._id,
           fullname: newUser.fullname,
           email: newUser.email,
-          isAdmin: newUser.isAdmin,
+          roles: newUser.roles,
           image: newUser.image,
         },
-        token: jwt.generate(newUser._id),
+        token,
       });
     } else {
       res
@@ -62,10 +62,10 @@ const login = asyncHandler(async (req, res) => {
         _id: user._id,
         fullname: user.fullname,
         email: user.email,
-        isAdmin: user.isAdmin,
+        roles: user.roles,
         image: user.image,
       },
-      token: jwt.generate(user._id),
+      token: jwt.generate(user),
     });
   } else {
     res
