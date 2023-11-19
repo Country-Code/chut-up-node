@@ -8,18 +8,19 @@ const Log = {
         let starsLen = LOG_LENGTH - 6 - title.length - currentDate.length;
         console[this.type](`${currentDate} === ${title} ${"*".repeat(starsLen)}`);
     },
-    logEnd: function () {
-        console[this.type](`${"*".repeat(LOG_LENGTH)}\n`);
+    logLine: function () {
+        console[this.type](`${"#".repeat(LOG_LENGTH)}`);
     },
     logMessage: function (message) {
-        console[this.type](`${"*".repeat(50)} Body   :`);
+        console[this.type](`${"=".repeat(50)} Body   :`);
         console[this.type](message);
     },
     log: function (message, title = null) {
         let loggedTitle = title ?? this.type.toUpperCase()
+        this.logLine();
         this.logTitle(loggedTitle);
         this.logMessage(message);
-        this.logEnd(this.type);
+        this.logLine();
     }
 }
 

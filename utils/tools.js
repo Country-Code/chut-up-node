@@ -44,12 +44,11 @@ function logReq(req) {
 }
 
 const getMiddlewaresFromConfig = (entityName) => {
-    const reader = require('./tools/reader');
     const path = require('path');
     
     const middlewaresConfigFilePath = path.resolve(__dirname, "../config/middlewares.yaml")
     
-    const middlewaresConfig = reader.yaml(middlewaresConfigFilePath)
+    const middlewaresConfig = fs.read.yaml(middlewaresConfigFilePath)
     let routerMiddlewares = []
     if (middlewaresConfig) routerMiddlewares = middlewaresConfig[entityName] ?? []
     return routerMiddlewares
