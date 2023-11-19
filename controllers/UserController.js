@@ -25,7 +25,7 @@ const getProfile = asyncHandler(async (req, res) => {
           isAdmin: user.isAdmin,
           image: user.image,
         },
-        token: jwt.generate(user._id)
+        token: jwt.generate(user)
       });
     } else {
       res.status(404).json({ message: "The user not found!", status: "KO" });
@@ -56,7 +56,7 @@ const editProfile = asyncHandler(async (req, res) => {
     res.json({
       message: "Profile updated successfully",
       user: updatedUser,
-      token: jwt.generate(user._id),
+      token: jwt.generate(user),
     });
   } catch (error) {
     console.error(error);

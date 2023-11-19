@@ -65,7 +65,7 @@ const login = asyncHandler(async (req, res) => {
         roles: user.roles,
         image: user.image,
       },
-      token: jwt.generate(user._id),
+      token: jwt.generate(user),
     });
   } else {
     res
