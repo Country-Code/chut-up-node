@@ -1,11 +1,11 @@
 const { Router } = require("express");
 const router = Router();
 const userController = require("../controllers/UserController");
-const authMiddleware = require("../middlewares/AuthMiddleware")
+const {verifyOneRole, verifyAllRoles, isAuthenticated} = require("../middlewares/AuthMiddleware")
 
-router.route("/").get(authMiddleware.isAdmin, userController.getAll);
-router.route("/profile").get(authMiddleware.isAuthenticated, userController.getProfile);
-router.route("/profile").put(authMiddleware.isAuthenticated, userController.editProfile);
-router.route("/profile").delete(authMiddleware.isAuthenticated, userController.deleteProfile);
+router.route("/").get(verifyOneRole("super-admin", "user"), userController.getAll);
+router.route("/profile").get(isAuthenticated, userController.getProfile);
+router.route("/profile").put(isAuthenticated, userController.editProfile);
+router.route("/profile").delete(isAuthenticated, userController.deleteProfile);
 
 module.exports = router;

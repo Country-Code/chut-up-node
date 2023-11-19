@@ -1,9 +1,9 @@
 const asyncHandler = require("express-async-handler");
-const User = require("../models/UserModel");
 const jwt = require("jsonwebtoken");
+const {logger} = require('../utils/tools');
 
 const getUserDataFromJWT = (authorization) => {
-  let data = { error: {}, token: null }
+  let data = { error: {}, user: null }
   let token;
 
   if (!authorization?.startsWith('Bearer ')) {
@@ -20,38 +20,62 @@ const getUserDataFromJWT = (authorization) => {
           data.error.status = 403;
           data.error.message = err.message;
         } else {
-          data.token = {id: decodedToken.id, roles: decodedToken.roles};
+          logger.log().log(decodedToken, "getUserDataFromJWT decodedToken");
+          data.user = {id: decodedToken._id, roles: decodedToken.roles};
           data.error = null
         }
       });
     }
   }
+          logger.log().log(data, "getUserDataFromJWT data");
   return data;
 }
 
 const isAuthenticated = (req, res, next) => {
-  const { token, error } = getUserDataFromJWT(req.headers["authorization"] || req.headers["Authorization"]);
+  const { user, error } = getUserDataFromJWT(req.headers["authorization"] || req.headers["Authorization"]);
   if (error) {
-    return res.status(error.status).json({ message: error.message, status: "KO" });
+    res.status(error.status)
+    throw new Error(error.message);
   }
-  req.token = token;
+  req.user = user;
   next();
 };
 
-const isAdmin = asyncHandler(async (req, res, next) => {
-  const { token, error } = getUserDataFromJWT(req.headers["authorization"]);
-  if (error) {
-    return res.status(error.status).json({ message: error.message, status: "KO" });
-  }
-
-  const user = await User.findById(token.id);
-
-  if (user?.isAdmin) {
-    req.token = token;
+const verifyOneRole = (...allowedRoles) => {
+  return (req, res, next) => {
+    const { user, error } = getUserDataFromJWT(req.headers["authorization"] || req.headers["Authorization"]);
+    if (error) {
+      res.status(error.status)
+      throw new Error(error.message);
+    }
+    const allowedRolesArray = [...allowedRoles];
+    const isAllowed = user.roles.map(role => allowedRolesArray.includes(role)).find(val => val === true);
+    if (!isAllowed) {
+      res.status(401)
+      throw new Error('Required roles missed!');
+    }
     next();
-  } else {
-    return res.status(403).json({ message: 'Requires admin access' });
   }
-})
+}
 
-module.exports = { isAuthenticated, isAdmin };
+const verifyAllRoles = (...allowedRoles) => {
+  return (req, res, next) => {
+    const { user, error } = getUserDataFromJWT(req.headers["authorization"] || req.headers["Authorization"]);
+    if (error) {
+      res.status(error.status)
+      throw new Error(error.message);
+    }
+    const allowedRolesArray = [...allowedRoles];
+    const isDenied = allowedRolesArray.map(role => !user.roles.includes(role)).find(val => val === true);
+    logger.log().log(`verifyAllRoles allowedRolesArray : ${allowedRolesArray}`);
+    console.log("verifyAllRoles user.roles : ", user.roles);
+    console.log("verifyAllRoles result : ", isDenied);
+    if (isDenied) {
+      res.status(401)
+      throw new Error('At least one of the required roles missed!');
+    }
+    next();
+  }
+}
+
+module.exports = { isAuthenticated, verifyOneRole, verifyAllRoles };
