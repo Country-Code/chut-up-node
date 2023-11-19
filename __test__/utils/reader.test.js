@@ -1,10 +1,10 @@
-const reader = require("../../utils/reader")
+const { fs } = require("../../utils/tools")
 const path = require('path');
-const MOCK_PATH  = path.resolve(__dirname , '../mocks/utils/reader');
+const MOCK_PATH  = path.resolve(__dirname , '../mocks/utils/tools');
 
 describe('YAML Reader', () => {
     test('should read YAML file and parse data', () => {
-        let data = reader.yaml(`${MOCK_PATH}/data.yaml`)
+        let data = fs.read.yaml(`${MOCK_PATH}/data.yaml`)
 
         expect(data).toEqual({
             name: 'John Doe',
@@ -19,12 +19,12 @@ describe('YAML Reader', () => {
     });
 
     it("should return null for not found yaml file", ()=> {
-        let data = reader.yaml(`${MOCK_PATH}/notFound.yaml`)
+        let data = fs.read.yaml(`${MOCK_PATH}/notFound.yaml`)
         expect(data).toBeNull()
     })
 
     it("should return empty object", ()=> {
-        let data = reader.yaml(`${MOCK_PATH}/empty.yaml`)
+        let data = fs.read.yaml(`${MOCK_PATH}/empty.yaml`)
 
         expect(data).toEqual({})
     })

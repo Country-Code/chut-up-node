@@ -18,7 +18,7 @@ const extractFieldsFromRequestBody = (reqBody, schema) => {
 
 function loadModule(module) {
     const modulePath = path.resolve(__dirname, "../", module)
-    if (fs.jsFileExists(modulePath)) {
+    if (fs.file.exists(modulePath)) {
         const moduleContent = require(modulePath);
         return moduleContent
     }
@@ -44,7 +44,7 @@ function logReq(req) {
 }
 
 const getMiddlewaresFromConfig = (entityName) => {
-    const reader = require('./reader');
+    const reader = require('./tools/reader');
     const path = require('path');
     
     const middlewaresConfigFilePath = path.resolve(__dirname, "../config/middlewares.yaml")
