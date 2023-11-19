@@ -9,45 +9,55 @@ function getCRUDController(model) {
       const reqBody = req.body;
       const itemData = tools.extractFieldsFromRequestBody(reqBody, model.schema);
       const data = await model.create(itemData);
-      res.status(201).json({
-        data,
-      });
+      res
+        .status(201)
+        .json({
+          data,
+          status: "SUCCESS"
+        });
     }),
 
     getAll: asyncHandler(async (req, res) => {
       const data = await model.find();
-      res.status(200).json({
+      res.json({
         data,
+        status: "SUCCESS"
       });
     }),
 
-    getById: async (req, res) => {
+    getById: asyncHandler(async (req, res) => {
       const itemId = req.params.id;
 
-      const document = await model.findById(itemId);
-      if (!document) {
+      const data = await model.findById(itemId);
+      if (!data) {
         res.status(404);
         throw new Error(`Document with ${itemId} not found!`);
       }
-      res.json(document);
-    },
+      res.json({
+        data,
+        status: "SUCCESS"
+      });
+    }),
 
-    updateById: async (req, res) => {
+    updateById: asyncHandler(async (req, res) => {
       const reqBody = req.body;
       const itemId = req.params.id;
       const itemData = tools.extractFieldsFromRequestBody(reqBody, model.schema);
 
-      const updatedDocument = await model.findByIdAndUpdate(itemId, itemData, {
+      const data = await model.findByIdAndUpdate(itemId, itemData, {
         new: true,
       });
-      if (!updatedDocument) {
+      if (!data) {
         res.status(404);
         throw new Error(`Document with ${itemId} not found!`);
       }
-      res.json(updatedDocument);
-    },
+      res.json({
+        data,
+        status: "SUCCESS"
+      });
+    }),
 
-    deleteById: async (req, res) => {
+    deleteById: asyncHandler(async (req, res) => {
       const itemId = req.params.id;
 
       const deletedDocument = await model.findByIdAndDelete(itemId);
@@ -57,9 +67,12 @@ function getCRUDController(model) {
       }
       res
         .status(204)
-        .json({ message: 'The ressource has been deleted successfully' });
+        .json({
+          message: 'The ressource has been deleted successfully',
+          status: "SUCCESS" 
+        });
 
-    },
+    })
   };
 }
 
