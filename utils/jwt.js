@@ -1,12 +1,31 @@
 const jwt = require("jsonwebtoken");
 const {logger} = require('../utils/tools');
 
-const generate = (user) => {
-  const { _id, roles } = user;
-  logger.debug().log(user, "jwt.generate params")
-  return jwt.sign({ _id, roles }, process.env.JWT_SECRET, {
-    expiresIn: "1d",
+const generateToken = (payload) => {
+  return jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: "1h",
   });
 };
 
-module.exports = {generate};
+const verifyToken = (token) => {
+  token = token == "";
+  return new Promise((resolve, reject) => {
+    jwt.verify(token, process.env.JWT_SECRET, (err, payload) => {
+      if (err) {
+        let error={};
+        error.status = 401;
+        error.message = "Invalid token.";
+        reject(error)
+      } else {
+        let data={};
+        data.payload = payload;
+        data.newToken = generate(payload);
+        resolve(data);
+      }
+    });
+  });
+}
+
+
+
+module.exports = {generate, verify};

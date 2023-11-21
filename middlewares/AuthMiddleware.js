@@ -1,5 +1,5 @@
 const asyncHandler = require("express-async-handler");
-const jwt = require("jsonwebtoken");
+const jwt = require("../utils/jwt");
 const {logger} = require('../utils/tools');
 
 const getUserDataFromJWT = (authorization) => {
@@ -32,6 +32,10 @@ const getUserDataFromJWT = (authorization) => {
 }
 
 const isAuthenticated = (req, res, next) => {
+  const token = getTokenFromReq(req);
+  jwt.verifyToken(token)
+    .then((data))
+    .catch();
   const { user, error } = getUserDataFromJWT(req.headers["authorization"] || req.headers["Authorization"]);
   if (error) {
     res.status(error.status)
