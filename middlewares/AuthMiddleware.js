@@ -1,81 +1,64 @@
 const asyncHandler = require("express-async-handler");
-const jwt = require("jsonwebtoken");
-const {logger} = require('../utils/tools');
+const jwt = require("../utils/jwt");
 
-const getUserDataFromJWT = (authorization) => {
-  let data = { error: {}, user: null }
-  let token;
-
-  if (!authorization?.startsWith('Bearer ')) {
-    data.error.status = 400;
-    data.error.message = "Invalid Bearer authorization.";
-  } else {
-    token = authorization.split(' ')[1];
-    if (token === undefined) {
-      data.error.status = 401;
-      data.error.message = "Access denied. No token provided.";
-    } else {
-      jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
-        if (err) {
-          data.error.status = 403;
-          data.error.message = err.message;
-        } else {
-          logger.log().log(decodedToken, "getUserDataFromJWT decodedToken");
-          data.user = {id: decodedToken._id, roles: decodedToken.roles};
-          data.error = null
-        }
-      });
-    }
+const getTokenFromReq = (req) => {
+  const authorization = req.headers["authorization"] || req.headers["Authorization"];
+  if (authorization?.startsWith('Bearer ') && authorization.split(' ')[1]) {
+    return authorization.split(' ')[1];
   }
-          logger.log().log(data, "getUserDataFromJWT data");
-  return data;
+  return null;
 }
 
-const isAuthenticated = (req, res, next) => {
-  const { user, error } = getUserDataFromJWT(req.headers["authorization"] || req.headers["Authorization"]);
-  if (error) {
-    res.status(error.status)
-    throw new Error(error.message);
+const verifyJWT = asyncHandler(async (req, res, next) => {
+  const token = getTokenFromReq(req);
+  let errorMessage = "Access denied. No token provided.";
+  if (token) {
+    console.log("verifyJWT token true: ", token);
+    await jwt
+      .verifyToken(token)
+      .then((data)=> {
+        console.log("verifyJWT token verified : ", data);
+        req.payload = data.payload;
+        req.newToken = data.newToken;
+        errorMessage = null;
+        next();
+      })
+      .catch((err) => {
+        console.log("verifyJWT token NOT verified. err : ", err);
+        errorMessage = err.message;
+      });
   }
-  req.user = user;
-  next();
-};
+  if (errorMessage) {
+    console.log("verifyJWT errorMessage: ", errorMessage);
+    res.status(401);
+    throw new Error(errorMessage);
+  }
+});
 
 const verifyOneRole = (...allowedRoles) => {
-  return (req, res, next) => {
-    const { user, error } = getUserDataFromJWT(req.headers["authorization"] || req.headers["Authorization"]);
-    if (error) {
-      res.status(error.status)
-      throw new Error(error.message);
-    }
-    const allowedRolesArray = [...allowedRoles];
-    const isAllowed = user.roles.map(role => allowedRolesArray.includes(role)).find(val => val === true);
+  return asyncHandler((req, res, next) => {
+    const userRoles = req.payload.roles;
+    const allowedRoles = [...allowedRoles];
+    const isAllowed = userRoles.map(role => allowedRoles.includes(role)).find(val => val === true);
     if (!isAllowed) {
-      res.status(401)
+      res.status(403);
       throw new Error('Required roles missed!');
     }
     next();
-  }
-}
+  });
+};
 
 const verifyAllRoles = (...allowedRoles) => {
-  return (req, res, next) => {
-    const { user, error } = getUserDataFromJWT(req.headers["authorization"] || req.headers["Authorization"]);
-    if (error) {
-      res.status(error.status)
-      throw new Error(error.message);
-    }
-    const allowedRolesArray = [...allowedRoles];
-    const isDenied = allowedRolesArray.map(role => !user.roles.includes(role)).find(val => val === true);
-    logger.log().log(`verifyAllRoles allowedRolesArray : ${allowedRolesArray}`);
-    console.log("verifyAllRoles user.roles : ", user.roles);
-    console.log("verifyAllRoles result : ", isDenied);
+  return asyncHandler((req, res, next) => {
+    const userRoles = req.payload.roles;
+    const allowedRoles = [...allowedRoles];
+    const isDenied = allowedRoles.map(role => !userRoles.includes(role)).find(val => val === true);
     if (isDenied) {
-      res.status(401)
+      res.status(403);
       throw new Error('At least one of the required roles missed!');
     }
     next();
-  }
-}
+  });
+};
 
-module.exports = { isAuthenticated, verifyOneRole, verifyAllRoles };
+module.exports = { verifyJWT, verifyOneRole, verifyAllRoles };

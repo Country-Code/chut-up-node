@@ -1,7 +1,3 @@
-const userRouter = require("./router/UserRouter")
-const chatRouter = require("./router/ChatRouter")
-const authRouter = require("./router/AuthRouter")
-const testRouter = require("./router/TestRouter")
 const tools = require("./utils/tools")
 const { errorHandler, notFoundHandler } = require("./middlewares/errorMiddleware")
 
@@ -17,11 +13,13 @@ app.all("*", (req, res, next) => {
     next()
 })
 
-app.use("/api/users", userRouter);
-app.use("/api/chats", chatRouter);
-app.use("/api/tests", testRouter);
-app.use("/api/auth", authRouter);
+app.use("/api/auth", require("./router/authRouter"));
+app.use("/test", require("./router/testRouter"));
+app.use("/api/", require("./router/apiRouter"));
 
 app.use(notFoundHandler, errorHandler);
+
+// const listEndpoints = require('express-list-endpoints');
+// console.log(listEndpoints(app));
 
 module.exports = app

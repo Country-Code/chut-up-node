@@ -1,5 +1,5 @@
 const asyncHandler = require("express-async-handler");
-const User = require("../models/UserModel");
+const User = require("../models/usersModel");
 const jwt = require("../utils/jwt");
 
 const getAll = asyncHandler(async (req, res) => {
@@ -11,8 +11,21 @@ const getAll = asyncHandler(async (req, res) => {
 });
 
 const getProfile = asyncHandler(async (req, res) => {
-  const userId = req.token.id
-  const user = await User.findById(userId);
+  console.log("getProfile CALL :")
+  const userId = req.payload._id
+  let user = null;
+  try {
+    user = await User.findById(userId);
+  } catch (error) {
+    if (error.message.includes("buffering timed out after")) {
+      res.status(404);
+      error.message = "Timeout - The user is not found!";
+    } else {
+      res.status(500);
+    }
+    throw error;
+  }
+  console.log("getProfile - user : ", user)
   if (user) {
     res.json({
       user: {
@@ -22,17 +35,18 @@ const getProfile = asyncHandler(async (req, res) => {
         isAdmin: user.isAdmin,
         image: user.image,
       },
-      token: jwt.generate(user),
+      token: req.newToken,
       status: "SUCCESS"
     });
   } else {
+    console.log("getProfile - 404 : ", 404)
     res.status(404)
-    throw new Error("he user not found!");
+    throw new Error("The user is not found!");
   }
 });
 
 const editProfile = asyncHandler(async (req, res) => {
-  const userId = req.token.id;
+  const userId = req.payload._id;
 
   const user = await User.findById(userId);
 
@@ -52,13 +66,13 @@ const editProfile = asyncHandler(async (req, res) => {
   res.json({
     message: "Profile updated successfully",
     user: updatedUser,
-    token: jwt.generate(user),
+    token: req.newToken,
     status: "SUCCESS"
   });
 });
 
 const deleteProfile = asyncHandler(async (req, res) => {
-  const userId = req.token.id;
+  const userId = req.payload._id;
 
   const result = await User.deleteOne({ _id: userId });
 

@@ -41,7 +41,7 @@ const logger = {
     },
     error: () => {
         let errorLog = Object.create(Log);
-        errorLog.type = "error";
+        errorLog.type = "log";
         return errorLog
     },
 }

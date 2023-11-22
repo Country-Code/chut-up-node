@@ -10,7 +10,7 @@ module.exports = mongoose.Schema(
       type: "String",
       required: true,
       trim: true,
-      maxlength: [20, "max characters is 20!"],
+      maxlength: [50, "max characters is 20!"],
       minlength: [2, "min characters is 2!"],
     },
     email: {

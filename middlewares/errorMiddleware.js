@@ -12,24 +12,23 @@ const prepareAndLogError = (err) => {
     let message = "";
     message += `Error Message   : "${err.message}"\n`;
     message += `Error location  : "${getFirstFileFromStack(err.stack)}"\n`;
-    message += `Error stack     : \n${err.stack}\n`;
+    // message += `Error stack     : \n${err.stack}\n`;
     logger.error().log(message, "Internal Server Error")
 }
 
 const notFoundHandler = (req, res) => {
     res.status(404)
-    throw new Error(`Not Found - ${req.originalUrl}`);
+    throw new Error(`${req.method} '${req.originalUrl}' - is Not Found!`);
 }
 
 const errorHandler = (err, req, res, next) => {
+    console.log("Error code before handling : ", res.statusCode)
     prepareAndLogError(err);
-
     let message = "An unexpected Internal Server Error occurred. Please check the server logs for more detailed information.";
-    let status = 500;
+    let status = res.statusCode === 200 ? 500 : res.statusCode;
 
-    if (res.statusCode) {
+    if (status !== 500) {
         message =  err.message;
-        status = res.statusCode;
     }
 
     res.status(status).json({message, status: "KO"});
