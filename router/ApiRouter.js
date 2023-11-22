@@ -1,10 +1,10 @@
 const { Router } = require("express");
 const router = Router();
-const authMiddleware = require("../middlewares/AuthMiddleware")
+const authMiddleware = require("../middlewares/authMiddleware")
 
-router.route("/").use(authMiddleware.verifyJWT);
-router.route("/profile").use(require("./api/profileRouter"));
-router.route("/chats").use(require("./api/chatsRouter"));
-router.route("/messages").use(require("./api/messagesRouter"));
+router.use(authMiddleware.verifyJWT);
+router.use("/profile", require("./api/profileRouter"));
+router.use("/chats", require("./api/chatsRouter"));
+router.use("/messages", require("./api/messagesRouter"));
 
 module.exports = router;

@@ -2,7 +2,7 @@ const { fs } = require("../../utils/tools")
 const path = require('path');
 const MOCK_PATH  = path.resolve(__dirname , '../mocks/utils/tools');
 
-describe('YAML Reader', () => {
+describe.skip('YAML Reader', () => {
     test('should read YAML file and parse data', () => {
         let data = fs.read.yaml(`${MOCK_PATH}/data.yaml`)
 

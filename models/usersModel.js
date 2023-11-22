@@ -1,13 +1,13 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const crypto = require('crypto');
-const userEntity = require("./entities/UserEntity");
+const usersEntity = require("./entities/usersEntity");
 
-userEntity.methods.verifyPassword = async function (pw) {
+usersEntity.methods.verifyPassword = async function (pw) {
   return await bcrypt.compare(pw, this.password);
 };
 
-userEntity.methods.createResetPasswordToken = async function () {
+usersEntity.methods.createResetPasswordToken = async function () {
   const token = crypto.randomUUID()
   this.resetPasswordToken = token;
   this.resetPasswordTokenExpires = Date.now() + 1000 * 60 * 60;
@@ -17,19 +17,19 @@ userEntity.methods.createResetPasswordToken = async function () {
   return token;
 };
 
-userEntity.methods.cleanResetPasswordData = async function () {
+usersEntity.methods.cleanResetPasswordData = async function () {
   this.resetPasswordToken = undefined;
   this.resetPasswordTokenExpires = undefined;
   await this.save()
   return true;
 };
 
-userEntity.methods.setPassword = async function (pw) {
+usersEntity.methods.setPassword = async function (pw) {
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(pw, salt);
 }
 
-userEntity.methods.setRoles = async function (roles) {
+usersEntity.methods.setRoles = async function (roles) {
   if (Array.isArray(roles) && roles.length > 0) {
     this.roles = [...(new Set(roles))]
   } else if (!Array.isArray(roles)) {
@@ -38,4 +38,4 @@ userEntity.methods.setRoles = async function (roles) {
 }
 
 
-module.exports = mongoose.model("User", userEntity);
+module.exports = mongoose.model("users", usersEntity);

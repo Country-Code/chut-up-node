@@ -1,4 +1,4 @@
-const controller = require("../controllers/ChatController");
-const smfw = require("../utils/smfw");
+const controller = require("../../controllers/messagesController");
+const smfw = require("../../utils/smfw");
 
-module.exports = smfw.getCRUDRouter(controller, "chats")
+module.exports = smfw.getCRUDRouter(controller, "messages")

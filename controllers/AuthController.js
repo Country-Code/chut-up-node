@@ -1,6 +1,6 @@
 
 const asyncHandler = require("express-async-handler");
-const User = require("../models/UserModel");
+const User = require("../models/usersModel");
 const jwt = require("../utils/jwt");
 const mailer = require("../config/mailer")
 
@@ -28,7 +28,6 @@ const register = asyncHandler(async (req, res) => {
   await newUser.setPassword(password);
   if (roles) await newUser.setRoles(roles);
   await newUser.save();
-  let token = jwt.generate(newUser);
   if (newUser) {
     res.status(201).json({
       user: {
@@ -38,7 +37,7 @@ const register = asyncHandler(async (req, res) => {
         roles: newUser.roles,
         image: newUser.image,
       },
-      token,
+      token: jwt.generateToken(newUser),
       status: "SUCCESS"
     });
   } else {
@@ -61,7 +60,7 @@ const login = asyncHandler(async (req, res) => {
         roles: user.roles,
         image: user.image,
       },
-      token: jwt.generate(user),
+      token: jwt.generateToken(user),
       status: "SUCCESS"
     });
   } else {

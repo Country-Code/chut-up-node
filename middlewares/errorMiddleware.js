@@ -12,7 +12,7 @@ const prepareAndLogError = (err) => {
     let message = "";
     message += `Error Message   : "${err.message}"\n`;
     message += `Error location  : "${getFirstFileFromStack(err.stack)}"\n`;
-    message += `Error stack     : \n${err.stack}\n`;
+    // message += `Error stack     : \n${err.stack}\n`;
     logger.error().log(message, "Internal Server Error")
 }
 
