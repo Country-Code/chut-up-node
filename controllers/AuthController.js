@@ -11,14 +11,14 @@ const register = asyncHandler(async (req, res) => {
 
   if (!fullname || !email || !password) {
     res.status(400)
-    throw new Error("Please Enter all the Feilds");
+    throw new Error("Please Enter all the Feilds!");
   }
 
   const user = await User.findOne({ email });
 
   if (user) {
     res.status(400)
-    throw new Error("User already exists");
+    throw new Error("User already exists!");
   }
 
   const newUser = await new User({

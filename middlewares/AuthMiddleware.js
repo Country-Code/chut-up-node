@@ -1,16 +1,8 @@
 const asyncHandler = require("express-async-handler");
 const jwt = require("../utils/jwt");
 
-const getTokenFromReq = (req) => {
-  const authorization = req.headers["authorization"] || req.headers["Authorization"];
-  if (authorization?.startsWith('Bearer ') && authorization.split(' ')[1]) {
-    return authorization.split(' ')[1];
-  }
-  return null;
-}
-
 const verifyJWT = asyncHandler(async (req, res, next) => {
-  const token = getTokenFromReq(req);
+  const token = jwt.getTokenFromReq(req);
   let errorMessage = "Access denied. No token provided.";
   if (token) {
     console.log("verifyJWT token true: ", token);

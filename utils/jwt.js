@@ -1,6 +1,14 @@
 const jwt = require("jsonwebtoken");
 const {logger} = require('../utils/tools');
 
+const getTokenFromReq = (req) => {
+  const authorization = req.headers["authorization"] || req.headers["Authorization"];
+  if (authorization?.startsWith('Bearer ') && authorization.split(' ')[1]) {
+    return authorization.split(' ')[1];
+  }
+  return null;
+}
+
 const generateToken = (payload) => {
   let {_id, roles} = payload;
   return jwt.sign({_id, roles}, process.env.JWT_SECRET, {
@@ -28,4 +36,4 @@ const verifyToken = (token) => {
 
 
 
-module.exports = {generateToken, verifyToken};
+module.exports = {generateToken, verifyToken, getTokenFromReq};
