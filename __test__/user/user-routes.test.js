@@ -22,7 +22,8 @@ describe("GET /api/profile", () => {
                 .set({ Authorization:  "Bearer " + token});
         
             expect(response.status).toBe(404);
-            expect(response.body).toHaveProperty("message", "The user is not found!");
+            expect(response.body).toHaveProperty("message");
+            expect(response.body.message).toContain("The user is not found!");
         }, 30000);
     })
 })

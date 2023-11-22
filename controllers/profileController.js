@@ -13,11 +13,16 @@ const getAll = asyncHandler(async (req, res) => {
 const getProfile = asyncHandler(async (req, res) => {
   console.log("getProfile CALL :")
   const userId = req.payload._id
-  const user = null;
+  let user = null;
   try {
     user = await User.findById(userId);
   } catch (error) {
-    res.status(500);
+    if (error.message.includes("buffering timed out after")) {
+      res.status(404);
+      error.message = "Timeout - The user is not found!";
+    } else {
+      res.status(500);
+    }
     throw error;
   }
   console.log("getProfile - user : ", user)

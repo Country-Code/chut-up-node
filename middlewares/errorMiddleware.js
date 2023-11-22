@@ -25,11 +25,10 @@ const errorHandler = (err, req, res, next) => {
     prepareAndLogError(err);
 
     let message = "An unexpected Internal Server Error occurred. Please check the server logs for more detailed information.";
-    let status = 500;
+    let status = res.statusCode === 200 ? 500 : res.statusCode;
 
-    if (res.statusCode) {
+    if (status !== 500) {
         message =  err.message;
-        status = res.statusCode;
     }
 
     res.status(status).json({message, status: "KO"});
