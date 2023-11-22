@@ -43,7 +43,6 @@ const register = asyncHandler(async (req, res) => {
       status: "SUCCESS"
     });
   } else {
-    res.status(400)
     throw new Error("Error while creating the user!");
   }
 });
@@ -81,11 +80,10 @@ const resetPasswordRequest = asyncHandler(async (req, res) => {
     console.log("Error code in ath : ", res.statusCode)
     throw new Error(`User with email '${email}' is not found.`);
   }
+
   let token = await user.createResetPasswordToken()
-  console.log("token is :", token)
-  console.log("typeof token is :", typeof token)
   let resetUrl = `${req.headers.origin}/reset-password/${token}`
-  console.log("resetUrl is :", resetUrl)
+  console.log("resetPasswordRequest - resetUrl is :", resetUrl)
   let html = fs.read.file(path.resolve(__dirname, "../views/reset-password-mail.html"));
   html = html.replace('{resetUrl}', resetUrl);
   mailer.sendMail({
@@ -95,7 +93,11 @@ const resetPasswordRequest = asyncHandler(async (req, res) => {
     user.cleanResetPasswordData()
     throw err;
   }, () => {
-    res.json({ message: `Password reset mail is sent to ${user.email}`, email: user.email, status: "SUCCESS" });
+    res.json({
+      message: `Password reset mail is sent to ${user.email}`,
+      email: user.email,
+      status: "SUCCESS"
+    });
   })
 });
 
@@ -119,7 +121,10 @@ const resetPasswordAction = asyncHandler(async (req, res) => {
   }
   await user.setPassword(newPassword);
   await user.cleanResetPasswordData();
-  res.json({ message: 'Password reseted successfully', status: "SUCCESS" });
+  res.json({
+    message: 'Password reseted successfully',
+    status: "SUCCESS"
+  });
 });
 
 module.exports = { register, login, resetPasswordRequest, resetPasswordAction };
