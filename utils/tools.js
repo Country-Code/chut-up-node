@@ -35,11 +35,15 @@ function loadModuleMethod(module, method) {
 function logReq(req) {
     const APP_ENV = process.env.APP_ENV
     if (APP_ENV !== "production") {
+        console.log("#".repeat(150))
         console.log("*".repeat(30) + "       " + req.method + " - " + req.url)
         console.log(`Env : ${APP_ENV}`)
+        console.log('req.headers :', req.headers);
         console.log(`req.query : `, req.query)
         console.log(`req.params : `, req.params)
         console.log(`req.headers.authorization : `, req.headers.authorization)
+        console.log("*".repeat(150))
+        console.log("#".repeat(150))
     }
 }
 

@@ -15,6 +15,9 @@ const smfs = {
         },
     },
     read: {
+        file: function (filePath) {
+            return fs.readFileSync(filePath, 'utf8');
+        },
         yaml: function (filePath) {
             try {
               const yamlFileContent = fs.readFileSync(filePath, 'utf8');

@@ -18,12 +18,12 @@ const prepareAndLogError = (err) => {
 
 const notFoundHandler = (req, res) => {
     res.status(404)
-    throw new Error(`Not Found - ${req.originalUrl}`);
+    throw new Error(`${req.method} '${req.originalUrl}' - is Not Found!`);
 }
 
 const errorHandler = (err, req, res, next) => {
+    console.log("Error code before handling : ", res.statusCode)
     prepareAndLogError(err);
-
     let message = "An unexpected Internal Server Error occurred. Please check the server logs for more detailed information.";
     let status = res.statusCode === 200 ? 500 : res.statusCode;
 

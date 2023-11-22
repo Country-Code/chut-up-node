@@ -2,7 +2,9 @@
 const asyncHandler = require("express-async-handler");
 const User = require("../models/usersModel");
 const jwt = require("../utils/jwt");
+const {fs} = require("../utils/tools");
 const mailer = require("../config/mailer")
+const path = require("path");
 
 const register = asyncHandler(async (req, res) => {
   const { fullname, email, password, image, roles } = req.body;
@@ -72,31 +74,29 @@ const login = asyncHandler(async (req, res) => {
 const resetPasswordRequest = asyncHandler(async (req, res) => {
   const { email } = req.body;
 
-  try {
-    const user = await User.findOne({ email });
+  const user = await User.findOne({ email });
 
-    if (!user) {
-      res.status(404)
-      throw new Error(`User with email '${email}' is not found.`);
-    }
-    let token = await user.createResetPasswordToken()
-    console.log("token is :", token)
-    console.log("typeof token is :", typeof token)
-    let resetUrl = `${req.protocol}://${req.get('host')}/api/auth/reset-password/${token}`
-    console.log("resetUrl is :", resetUrl)
-    mailer.sendMail({
-      to: user.email,
-      html: `<a href="${resetUrl}">Change password</a>`
-    }, (err) => {
-      user.cleanResetPasswordData()
-      throw err;
-    }, () => {
-      res.json({ message: `Password reset mail is sent to ${user.email}`, email: user.email, status: "SUCCESS" });
-    })
-  } catch (error) {
-    res.status(500);
-    throw error;
+  if (!user) {
+    res.status(404);
+    console.log("Error code in ath : ", res.statusCode)
+    throw new Error(`User with email '${email}' is not found.`);
   }
+  let token = await user.createResetPasswordToken()
+  console.log("token is :", token)
+  console.log("typeof token is :", typeof token)
+  let resetUrl = `${req.headers.origin}/reset-password/${token}`
+  console.log("resetUrl is :", resetUrl)
+  let html = fs.read.file(path.resolve(__dirname, "../views/reset-password-mail.html"));
+  html = html.replace('{resetUrl}', resetUrl);
+  mailer.sendMail({
+    to: user.email,
+    html
+  }, (err) => {
+    user.cleanResetPasswordData()
+    throw err;
+  }, () => {
+    res.json({ message: `Password reset mail is sent to ${user.email}`, email: user.email, status: "SUCCESS" });
+  })
 });
 
 const resetPasswordAction = asyncHandler(async (req, res) => {
