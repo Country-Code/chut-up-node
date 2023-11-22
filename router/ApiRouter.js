@@ -4,7 +4,7 @@ const authMiddleware = require("../middlewares/authMiddleware")
 
 router.use(authMiddleware.verifyJWT);
 router.use("/profile", require("./api/profileRouter"));
-router.use("/chats", require("./api/chatsRouter"));
 router.use("/messages", require("./api/messagesRouter"));
+router.use("/chats", require("./api/chatsRouter"));
 
 module.exports = router;
