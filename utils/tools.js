@@ -3,19 +3,7 @@ const logger = require("./tools/logger");
 const date = require("./tools/date");
 const fs = require("./tools/fs");
 const errorUtil = require("./tools/errorUtil");
-
-const extractFieldsFromRequestBody = (reqBody, schema) => {
-    const allowedFields = Object.keys(schema.paths);
-    const extractedFields = {};
-
-    allowedFields.forEach((field) => {
-        if (reqBody[field] !== undefined) {
-            extractedFields[field] = reqBody[field];
-        }
-    });
-
-    return extractedFields;
-};
+const object = require("./tools/object");
 
 function loadModule(module) {
     const modulePath = path.resolve(__dirname, "../", module)
@@ -60,4 +48,4 @@ const getMiddlewaresFromConfig = (entityName) => {
 }
 
 
-module.exports = { date, logger, fs, errorUtil, loadModule, loadModuleMethod, extractFieldsFromRequestBody, logReq, getMiddlewaresFromConfig}
+module.exports = { date, logger, fs, object, errorUtil, loadModule, loadModuleMethod, logReq, getMiddlewaresFromConfig}
