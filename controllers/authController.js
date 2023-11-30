@@ -5,20 +5,20 @@ const jwt = require("../utils/jwt");
 const {fs} = require("../utils/tools");
 const mailer = require("../config/mailer")
 const path = require("path");
+const { authErrors } = require("../config/errorCodes")
+const { errorUtil } = require("../utils/tools")
 
 const register = asyncHandler(async (req, res) => {
   const { fullname, email, password, image, roles } = req.body;
 
   if (!fullname || !email || !password) {
-    res.status(400)
-    throw new Error("Please Enter all the Feilds!");
+    throw errorUtil.generateError(authErrors.register.fields.missed);
   }
 
   const user = await User.findOne({ email });
 
   if (user) {
-    res.status(400)
-    throw new Error("User already exists!");
+    throw errorUtil.generateError(authErrors.register.user.exists);
   }
 
   const newUser = await new User({
@@ -43,7 +43,7 @@ const register = asyncHandler(async (req, res) => {
       status: "SUCCESS"
     });
   } else {
-    throw new Error("Error while creating the user!");
+    throw errorUtil.generateError(authErrors.register.user.create);
   }
 });
 
@@ -65,8 +65,7 @@ const login = asyncHandler(async (req, res) => {
       status: "SUCCESS"
     });
   } else {
-    res.status(401)
-    throw new Error("Invalid Email or Password!");
+    throw errorUtil.generateError(authErrors.login.credentials);
   }
 });
 
@@ -76,9 +75,8 @@ const resetPasswordRequest = asyncHandler(async (req, res) => {
   const user = await User.findOne({ email });
 
   if (!user) {
-    res.status(404);
     console.log("Error code in ath : ", res.statusCode)
-    throw new Error(`User with email '${email}' is not found.`);
+    throw errorUtil.generateError(authErrors.resetPasswordRequest.email, {email});
   }
 
   let token = await user.createResetPasswordToken()
@@ -107,17 +105,14 @@ const resetPasswordAction = asyncHandler(async (req, res) => {
   const user = await User.findOne({ resetPasswordToken });
 
   if (!user) {
-    res.status(404)
-    throw new Error(`No User with this resetPasswordToken : '${resetPasswordToken}'.`);
+    throw errorUtil.generateError(authErrors.resetPasswordAction.token.invalid, {token: resetPasswordToken});
   }
   if (user.resetPasswordTokenExpires < Date.now()) {
-    res.status(400)
-    throw new Error(`The resetPasswordToken is expired.`);
+    throw errorUtil.generateError(authErrors.resetPasswordAction.token.expired);
   }
 
   if (!newPassword) {
-    res.status(400)
-    throw new Error(`The new password is required!.`);
+    throw errorUtil.generateError(authErrors.resetPasswordAction.password);
   }
   await user.setPassword(newPassword);
   await user.cleanResetPasswordData();

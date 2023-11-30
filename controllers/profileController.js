@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const User = require("../models/usersModel");
-const jwt = require("../utils/jwt");
+const { profileErrors } = require("../config/errorCodes")
+const { errorUtil } = require("../utils/tools")
 
 const getAll = asyncHandler(async (req, res) => {
   const users = await User.find();
@@ -18,10 +19,7 @@ const getProfile = asyncHandler(async (req, res) => {
     user = await User.findById(userId);
   } catch (error) {
     if (error.message.includes("buffering timed out after")) {
-      res.status(404);
-      error.message = "Timeout - The user is not found!";
-    } else {
-      res.status(500);
+      throw errorUtil.generateError(profileErrors.timeout);
     }
     throw error;
   }
@@ -39,9 +37,7 @@ const getProfile = asyncHandler(async (req, res) => {
       status: "SUCCESS"
     });
   } else {
-    console.log("getProfile - 404 : ", 404)
-    res.status(404)
-    throw new Error("The user is not found!");
+    throw errorUtil.generateError(profileErrors.notfound, {userId});
   }
 });
 
@@ -51,8 +47,7 @@ const editProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(userId);
 
   if (!user) {
-    res.status(404)
-    throw new Error(`User with id : '${userId}' is not found!`);
+    throw errorUtil.generateError(profileErrors.notfound, {userId});
   }
 
   if (req.body.fullname) user.fullname = req.body.fullname;
@@ -77,8 +72,7 @@ const deleteProfile = asyncHandler(async (req, res) => {
   const result = await User.deleteOne({ _id: userId });
 
   if (result.deletedCount === 0) {
-    res.status(404)
-    throw new Error(`User with id : '${userId}' is not found!`);
+    throw errorUtil.generateError(profileErrors.notfound, {userId});
   }
 
   res.json({

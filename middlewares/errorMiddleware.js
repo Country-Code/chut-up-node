@@ -25,14 +25,15 @@ const errorHandler = (err, req, res, next) => {
     console.log("Error code before handling : ", res.statusCode)
     prepareAndLogError(err);
     let message = "An unexpected Internal Server Error occurred. Please check the server logs for more detailed information.";
+    let code = "UNEXPECTED_INTERNAL_SERVER_ERROR";
     let status = res.statusCode === 200 ? 500 : res.statusCode;
-
+    status = err.status ?? status;
     if (status !== 500) {
         message =  err.message;
+        code = err.code;
     }
 
-    res.status(status).json({message, status: "KO"});
+    res.status(status).json({message, code, status: "KO"});
 }
-
 
 module.exports = { errorHandler, notFoundHandler }

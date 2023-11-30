@@ -1,5 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const jwt = require("../utils/jwt");
+const { errorUtil } = require("../utils/tools")
+const { authErrors } = require("../config/errorCodes")
 
 const verifyJWT = asyncHandler(async (req, res, next) => {
   const token = jwt.getTokenFromReq(req);
@@ -22,8 +24,8 @@ const verifyJWT = asyncHandler(async (req, res, next) => {
   }
   if (errorMessage) {
     console.log("verifyJWT errorMessage: ", errorMessage);
-    res.status(401);
-    throw new Error(errorMessage);
+    errorConfig = authErrors.midlleware.token.missed;
+    throw errorUtil.generateError({...errorConfig, message: errorMessage})
   }
 });
 
@@ -33,8 +35,7 @@ const verifyOneRole = (...allowedRoles) => {
     const allowedRoles = [...allowedRoles];
     const isAllowed = userRoles.map(role => allowedRoles.includes(role)).find(val => val === true);
     if (!isAllowed) {
-      res.status(403);
-      throw new Error('Required roles missed!');
+      throw errorUtil.generateError(authErrors.midlleware.roles.oneRole);
     }
     next();
   });
@@ -43,11 +44,9 @@ const verifyOneRole = (...allowedRoles) => {
 const verifyAllRoles = (...allowedRoles) => {
   return asyncHandler((req, res, next) => {
     const userRoles = req.payload.roles;
-    const allowedRoles = [...allowedRoles];
     const isDenied = allowedRoles.map(role => !userRoles.includes(role)).find(val => val === true);
     if (isDenied) {
-      res.status(403);
-      throw new Error('At least one of the required roles missed!');
+      throw errorUtil.generateError(authErrors.midlleware.roles.allRoles);
     }
     next();
   });
