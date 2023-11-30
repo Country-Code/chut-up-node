@@ -2,6 +2,7 @@ const path = require('path');
 const logger = require("./tools/logger");
 const date = require("./tools/date");
 const fs = require("./tools/fs");
+const errorUtil = require("./tools/errorUtil");
 
 const extractFieldsFromRequestBody = (reqBody, schema) => {
     const allowedFields = Object.keys(schema.paths);
@@ -59,4 +60,4 @@ const getMiddlewaresFromConfig = (entityName) => {
 }
 
 
-module.exports = { date, logger, fs, loadModule, loadModuleMethod, extractFieldsFromRequestBody, logReq, getMiddlewaresFromConfig}
+module.exports = { date, logger, fs, errorUtil, loadModule, loadModuleMethod, extractFieldsFromRequestBody, logReq, getMiddlewaresFromConfig}

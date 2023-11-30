@@ -7,12 +7,13 @@ const env = require("dotenv")
 env.config()
 
 
-describe("GET /api/profile", () => {
+describe.only("GET /api/profile", () => {
     describe("User get profile", () => {
         it('it should respond with 401 when not authenticated', async () => {
             const response = await request(app).get('/api/profile');
             expect(response.status).toBe(401);
             expect(response.body).toHaveProperty("message", "Access denied. No token provided.");
+            expect(response.body).toHaveProperty("code", "AUTH_MIDLLEWARE_TOKEN_MISSED");
         });
         it('it should respond with 404 when user not found', async () => {
             jest.setTimeout(10 * 1000)
