@@ -1,7 +1,7 @@
-const io = require("socket.io");
+const socketIo = require("socket.io");
 
 const start = (server) => {
-    io(
+    const io = socketIo(
         server,
         {
             pingTimeout: 60000,
@@ -26,7 +26,7 @@ const start = (server) => {
                 console.log("User Joined Room: " + room);
             });
 
-            socket.on("typing",(room) => {
+            socket.on("typing", (room) => {
                 socket.in(room).emit("typing");
             });
 
