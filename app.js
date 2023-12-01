@@ -15,7 +15,7 @@ app.all("*", (req, res, next) => {
 
 app.use("/api/auth", require("./router/authRouter"));
 app.use("/test", require("./router/testRouter"));
-app.use("/api/", require("./router/apiRouter"));
+app.use("/api", require("./router/apiRouter"));
 
 app.use(notFoundHandler, errorHandler);
 

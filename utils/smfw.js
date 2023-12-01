@@ -7,7 +7,7 @@ function getCRUDController(model) {
   return {
     create: asyncHandler(async (req, res) => {
       const reqBody = req.body;
-      const itemData = tools.extractFieldsFromRequestBody(reqBody, model.schema);
+      const itemData = tools.object.filter(reqBody, Object.keys(model.schema.paths));
       const data = await model.create(itemData);
       res
         .status(201)
@@ -42,7 +42,7 @@ function getCRUDController(model) {
     updateById: asyncHandler(async (req, res) => {
       const reqBody = req.body;
       const itemId = req.params.id;
-      const itemData = tools.extractFieldsFromRequestBody(reqBody, model.schema);
+      const itemData = tools.object.filter(reqBody, Object.keys(model.schema.paths));
 
       const data = await model.findByIdAndUpdate(itemId, itemData, {
         new: true,
