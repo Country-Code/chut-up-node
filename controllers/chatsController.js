@@ -20,7 +20,7 @@ const getById = asyncHandler(async (req, res) => {
     if (chat) {
         res.json({
             chat,
-            token: req.token,
+            token: req.newToken,
             status: "SUCCESS"
         });
     } else {
@@ -55,7 +55,7 @@ const getUserChat = asyncHandler(async (req, res) => {
         res.json({
             chat,
             isNewChat: false,
-            token: req.token,
+            token: req.newToken,
             status: "SUCCESS"
         });
     } else {
@@ -75,7 +75,7 @@ const getUserChat = asyncHandler(async (req, res) => {
             .json({
                 chat,
                 isNewChat: true,
-                token: req.token,
+                token: req.newToken,
                 status: "SUCCESS"
             });
 
@@ -96,7 +96,7 @@ const getAll = asyncHandler(async (req, res) => {
                 });
                 res.json({
                     chats,
-                    token: req.token,
+                    token: req.newToken,
                     status: "SUCCESS"
                 });
             });
@@ -136,7 +136,7 @@ const create = asyncHandler(async (req, res) => {
         .status(201)
         .json({
             chatGroup,
-            token: req.token,
+            token: req.newToken,
             status: "SUCCESS"
         });
 });
@@ -163,7 +163,7 @@ const rename = asyncHandler(async (req, res) => {
     } else {
         res.json({
             updatedChat,
-            token: req.token,
+            token: req.newToken,
             status: "SUCCESS"
         });
     }
@@ -205,7 +205,7 @@ const addUser = asyncHandler(async (req, res) => {
 
     res.json({
         added,
-        token: req.token,
+        token: req.newToken,
         status: "SUCCESS"
     });
 });
@@ -243,7 +243,7 @@ const removeUser = asyncHandler(async (req, res) => {
     res.json({
         message: "The user is removed from the chat group successfully!",
         removed,
-        token: req.token,
+        token: req.newToken,
         status: "SUCCESS"
     });
 });
@@ -274,7 +274,7 @@ const leave = asyncHandler(async (req, res) => {
 
     res.json({
         message: "The user is removed from the chat group successfully!",
-        token: req.token,
+        token: req.newToken,
         status: "SUCCESS"
     });
 });

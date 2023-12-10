@@ -10,7 +10,7 @@ const getAll = asyncHandler(async (req, res) => {
     res.json({
         users,
         status: "SUCCESS",
-        token: req.token
+        token: req.newToken
     });
 });
 

@@ -8,7 +8,7 @@ const getAllByChat = asyncHandler(async (req, res) => {
         .populate("chat", "name");
     res.json({
         messages,
-        token: req.token,
+        token: req.newToken,
         status: "SUCCESS"
     });
 });
@@ -38,7 +38,7 @@ const send = asyncHandler(async (req, res) => {
 
     res.json({
         message,
-        token: req.token,
+        token: req.newToken,
         status: "SUCCESS"
     });
 });
@@ -67,7 +67,7 @@ const read = asyncHandler(async (req, res) => {
 
     res.json({
         message,
-        token: req.token,
+        token: req.newToken,
         status: "SUCCESS"
     });
 });
