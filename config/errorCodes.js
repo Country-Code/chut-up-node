@@ -64,6 +64,11 @@ module.exports = {
                     status: 401,
                     message: "No token provided!",
                 },
+                expired: {
+                    code: "AUTH_MIDLLEWARE_TOKEN_EXPIRED",
+                    status: 401,
+                    message: "Token expired!",
+                },
             },
             roles: {
                 oneRole: {
