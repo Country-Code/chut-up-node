@@ -23,8 +23,11 @@ const verifyJWT = asyncHandler(async (req, res, next) => {
       });
   }
   if (errorMessage) {
+    if (errorMessage === "jwt expired")
+      errorConfig = authErrors.midlleware.token.expired;
+    else
+      errorConfig = authErrors.midlleware.token.expired;
     console.log("verifyJWT errorMessage: ", errorMessage);
-    errorConfig = authErrors.midlleware.token.missed;
     throw errorUtil.generateError({...errorConfig, message: errorMessage})
   }
 });
