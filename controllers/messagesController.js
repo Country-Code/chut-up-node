@@ -32,7 +32,7 @@ const send = asyncHandler(async (req, res) => {
     let message = await messageModel.create(messageData);
 
     message = await message.populate("sender", "fullname email");
-    message = await message.populate("chat", "name");
+    message = await message.populate("chat", "name users");
 
     await chatModel.findByIdAndUpdate(req.body.chatId, { lastMessage: message });
 
