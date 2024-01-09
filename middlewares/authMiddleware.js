@@ -7,18 +7,18 @@ const verifyJWT = asyncHandler(async (req, res, next) => {
   const token = jwt.getTokenFromReq(req);
   let errorMessage = "Access denied. No token provided.";
   if (token) {
-    console.log("verifyJWT token true: ", token);
+    // console.log("verifyJWT token true: ", token);
     await jwt
       .verifyToken(token)
       .then((data)=> {
-        console.log("verifyJWT token verified : ", data);
+        // console.log("verifyJWT token verified : ", data);
         req.payload = data.payload;
         req.newToken = data.newToken;
         errorMessage = null;
         next();
       })
       .catch((err) => {
-        console.log("verifyJWT token NOT verified. err : ", err);
+        // console.log("verifyJWT token NOT verified. err : ", err);
         errorMessage = err.message;
       });
   }
@@ -27,7 +27,7 @@ const verifyJWT = asyncHandler(async (req, res, next) => {
       errorConfig = authErrors.midlleware.token.expired;
     else
       errorConfig = authErrors.midlleware.token.expired;
-    console.log("verifyJWT errorMessage: ", errorMessage);
+    // console.log("verifyJWT errorMessage: ", errorMessage);
     throw errorUtil.generateError({...errorConfig, message: errorMessage})
   }
 });
