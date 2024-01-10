@@ -20,8 +20,8 @@ const verifyToken = (token) => {
   token = token ?? "";
   return new Promise((resolve, reject) => {
     jwt.verify(token, process.env.JWT_SECRET, (error, payload) => {
-        console.log("verifyToken verify token error: ", error);
-        console.log("verifyToken verify token payload: ", payload);
+        // console.log("verifyToken verify token error: ", error);
+        // console.log("verifyToken verify token payload: ", payload);
       if (error) {
         reject(error)
       } else {
