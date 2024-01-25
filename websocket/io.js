@@ -62,6 +62,45 @@ const getServerSocketCallback = (server) => {
             });
         });
 
+        clientSocket.on("typing", (typingData) => {
+            console.log("#".repeat(100));
+            console.log("typing fired with typingData : ", typingData);
+            if (!typingData?.chat?.users)
+                return console.log("!typingData?.chat?.users not valid!");
+            else
+                console.log(
+                    "!typingData?.chat?.users :",
+                    typingData?.chat?.users
+                );
+
+            if (!typingData?.user)
+                return console.log("!typingData?.user not valid!");
+
+            typingData?.chat.users.forEach((user) => {
+                if (user._id !== typingData.user._id) {
+                    console.log(
+                        "is_typing event send to : ",
+                        user.email,
+                        user._id
+                    );
+                    // Get the list of socket IDs in 'room1'
+                    const room1Sockets =
+                        clientSocket.client.server.sockets.adapter.rooms;
+                    const socketIdsInRoom1 = room1Sockets
+                        ? Array.from(room1Sockets)
+                        : [];
+
+                    console.log("Socket IDs in : ", user._id, socketIdsInRoom1);
+
+                    clientSocket.to(user._id).emit("is_typing", {
+                        chat: typingData.chat,
+                        user: typingData.user,
+                        isTyping: typingData.isTyping,
+                    });
+                }
+            });
+        });
+
         clientSocket.off("init_connection", () => {
             console.log("USER DISCONNECTED");
             clientSocket.leave(user._id);
