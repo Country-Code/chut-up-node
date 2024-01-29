@@ -1,6 +1,6 @@
 chats:
-  - method: post
-    path: /
-    middlewares:
-      - module: "./middlewares/authMiddleware"
-        middleware: isAuthenticated
+    - method: post
+      path: /
+      middlewares:
+          - module: "./middlewares/authMiddleware"
+            middleware: isAuthenticated

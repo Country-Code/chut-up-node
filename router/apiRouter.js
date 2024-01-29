@@ -1,6 +1,6 @@
 const { Router } = require("express");
 const router = Router();
-const authMiddleware = require("../middlewares/authMiddleware")
+const authMiddleware = require("../middlewares/authMiddleware");
 
 router.use("/", authMiddleware.verifyJWT);
 router.use("/profile", require("./api/profileRouter"));

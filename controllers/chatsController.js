@@ -6,9 +6,10 @@ const jwt = require("../utils/jwt");
 const getById = asyncHandler(async (req, res) => {
     const chatId = req.params.id;
 
-    let chat = await chatModel.findOne({
-        _id: chatId
-    })
+    let chat = await chatModel
+        .findOne({
+            _id: chatId,
+        })
         .populate("users", "-password")
         .populate("lastMessage");
 
@@ -21,7 +22,7 @@ const getById = asyncHandler(async (req, res) => {
         res.json({
             chat,
             token: req.newToken,
-            status: "SUCCESS"
+            status: "SUCCESS",
         });
     } else {
         res.status(404);
@@ -36,13 +37,14 @@ const getUserChat = asyncHandler(async (req, res) => {
         throw new Error("the 'userId' is required!");
     }
 
-    let chat = await chatModel.findOne({
-        isGroup: false,
-        $and: [
-            { users: { $elemMatch: { $eq: req.payload._id } } },
-            { users: { $elemMatch: { $eq: userId } } },
-        ],
-    })
+    let chat = await chatModel
+        .findOne({
+            isGroup: false,
+            $and: [
+                { users: { $elemMatch: { $eq: req.payload._id } } },
+                { users: { $elemMatch: { $eq: userId } } },
+            ],
+        })
         .populate("users", "-password")
         .populate("lastMessage");
 
@@ -56,7 +58,7 @@ const getUserChat = asyncHandler(async (req, res) => {
             chat,
             isNewChat: false,
             token: req.newToken,
-            status: "SUCCESS"
+            status: "SUCCESS",
         });
     } else {
         let chatData = {
@@ -66,25 +68,22 @@ const getUserChat = asyncHandler(async (req, res) => {
         };
 
         const createdChat = await chatModel.create(chatData);
-        const chat = await chatModel.findOne({ _id: createdChat._id }).populate(
-            "users",
-            "-password"
-        );
-        res
-            .status(201)
-            .json({
-                chat,
-                isNewChat: true,
-                token: req.newToken,
-                status: "SUCCESS"
-            });
-
+        const chat = await chatModel
+            .findOne({ _id: createdChat._id })
+            .populate("users", "-password");
+        res.status(201).json({
+            chat,
+            isNewChat: true,
+            token: req.newToken,
+            status: "SUCCESS",
+        });
     }
 });
 
 const getAll = asyncHandler(async (req, res) => {
     try {
-        chatModel.find({ users: { $elemMatch: { $eq: req.payload._id } } })
+        chatModel
+            .find({ users: { $elemMatch: { $eq: req.payload._id } } })
             .populate("users", "-password")
             .populate("groupAdmins", "-password")
             .populate("lastMessage")
@@ -97,7 +96,7 @@ const getAll = asyncHandler(async (req, res) => {
                 res.json({
                     chats,
                     token: req.newToken,
-                    status: "SUCCESS"
+                    status: "SUCCESS",
                 });
             });
     } catch (error) {
@@ -107,10 +106,14 @@ const getAll = asyncHandler(async (req, res) => {
 });
 
 const create = asyncHandler(async (req, res) => {
-    const isGroupNameRequired = process.env.CHATS_IS_GROUP_NAME_REQUIRED ?? false;
+    const isGroupNameRequired =
+        process.env.CHATS_IS_GROUP_NAME_REQUIRED ?? false;
     const isNewGroupEnabled = process.env.CHATS_IS_NEW_GROUP_ENABLED ?? false;
 
-    if (!req.body.users || (isGroupNameRequired && req.body.isGroup && !req.body.name)) {
+    if (
+        !req.body.users ||
+        (isGroupNameRequired && req.body.isGroup && !req.body.name)
+    ) {
         res.status(400);
         throw new Error("Required fields are missed!");
     }
@@ -161,15 +164,16 @@ const rename = asyncHandler(async (req, res) => {
     const { name } = req.body;
     const chatId = req.params.id;
 
-    const updatedChat = await chatModel.findByIdAndUpdate(
-        chatId,
-        {
-            name: name,
-        },
-        {
-            new: true,
-        }
-    )
+    const updatedChat = await chatModel
+        .findByIdAndUpdate(
+            chatId,
+            {
+                name: name,
+            },
+            {
+                new: true,
+            }
+        )
         .populate("users", "-password")
         .populate("groupAdmins", "-password");
 
@@ -180,7 +184,7 @@ const rename = asyncHandler(async (req, res) => {
         res.json({
             updatedChat,
             token: req.newToken,
-            status: "SUCCESS"
+            status: "SUCCESS",
         });
     }
 });
@@ -195,7 +199,7 @@ const addUser = asyncHandler(async (req, res) => {
         throw new Error("The chat requested is Not Found!");
     } else if (!chatGroup.groupAdmins.includes(req.payload._id)) {
         res.status(403);
-        throw new Error("The user is not an admin.")
+        throw new Error("The user is not an admin.");
     }
 
     let user = await userModel.findById(userId);
@@ -203,26 +207,27 @@ const addUser = asyncHandler(async (req, res) => {
         res.status(404);
         throw new Error("User to add not found!");
     } else if (chatGroup.users.includes(userId)) {
-        res.status(409)
+        res.status(409);
         throw new Error("User is already a member of the group");
     }
 
-    const added = await chatModel.findByIdAndUpdate(
-        chatId,
-        {
-            $push: { users: userId },
-        },
-        {
-            new: true,
-        }
-    )
+    const added = await chatModel
+        .findByIdAndUpdate(
+            chatId,
+            {
+                $push: { users: userId },
+            },
+            {
+                new: true,
+            }
+        )
         .populate("users", "-password")
         .populate("groupAdmins", "-password");
 
     res.json({
         added,
         token: req.newToken,
-        status: "SUCCESS"
+        status: "SUCCESS",
     });
 });
 
@@ -236,23 +241,24 @@ const removeUser = asyncHandler(async (req, res) => {
         throw new Error("The chat requested is Not Found!");
     } else if (!chatGroup.groupAdmins.includes(req.payload._id)) {
         res.status(403);
-        throw new Error("The user is not an admin.")
+        throw new Error("The user is not an admin.");
     }
 
     if (!chatGroup.users.includes(userId)) {
-        res.status(409)
+        res.status(409);
         throw new Error("User is not a member of the group!");
     }
 
-    const removed = await chatModel.findByIdAndUpdate(
-        chatId,
-        {
-            $pull: { users: userId },
-        },
-        {
-            new: true,
-        }
-    )
+    const removed = await chatModel
+        .findByIdAndUpdate(
+            chatId,
+            {
+                $pull: { users: userId },
+            },
+            {
+                new: true,
+            }
+        )
         .populate("users", "-password")
         .populate("groupAdmins", "-password");
 
@@ -260,7 +266,7 @@ const removeUser = asyncHandler(async (req, res) => {
         message: "The user is removed from the chat group successfully!",
         removed,
         token: req.newToken,
-        status: "SUCCESS"
+        status: "SUCCESS",
     });
 });
 
@@ -275,23 +281,21 @@ const leave = asyncHandler(async (req, res) => {
     }
 
     if (!chatGroup.users.includes(userId)) {
-        res.status(409)
+        res.status(409);
         throw new Error("User is not a member of the group!");
     }
 
-    await chatModel.findByIdAndUpdate(
-        chatId,
-        {
+    await chatModel
+        .findByIdAndUpdate(chatId, {
             $pull: { users: userId },
-        }
-    )
+        })
         .populate("users", "-password")
         .populate("groupAdmins", "-password");
 
     res.json({
         message: "The user is removed from the chat group successfully!",
         token: req.newToken,
-        status: "SUCCESS"
+        status: "SUCCESS",
     });
 });
 
@@ -303,5 +307,5 @@ module.exports = {
     rename,
     addUser,
     removeUser,
-    leave
+    leave,
 };

@@ -3,13 +3,14 @@ const messageModel = require("../models/messagesModel");
 const chatModel = require("../models/chatsModel");
 
 const getAllByChat = asyncHandler(async (req, res) => {
-    const messages = await messageModel.find({ chat: req.params.id })
+    const messages = await messageModel
+        .find({ chat: req.params.id })
         .populate("sender", "fullname email")
         .populate("chat", "name");
     res.json({
         messages,
         token: req.newToken,
-        status: "SUCCESS"
+        status: "SUCCESS",
     });
 });
 
@@ -26,7 +27,7 @@ const send = asyncHandler(async (req, res) => {
         sender: userId,
         content: content,
         chat: chatId,
-        readBy: userId
+        readBy: userId,
     };
 
     let message = await messageModel.create(messageData);
@@ -34,12 +35,14 @@ const send = asyncHandler(async (req, res) => {
     message = await message.populate("sender", "fullname email");
     message = await message.populate("chat", "name users");
 
-    await chatModel.findByIdAndUpdate(req.body.chatId, { lastMessage: message });
+    await chatModel.findByIdAndUpdate(req.body.chatId, {
+        lastMessage: message,
+    });
 
     res.json({
         message,
         token: req.newToken,
-        status: "SUCCESS"
+        status: "SUCCESS",
     });
 });
 
@@ -52,23 +55,23 @@ const read = asyncHandler(async (req, res) => {
         throw new Error("The message requested is Not Found!");
     } else if (message.readBy.includes(userId)) {
         res.status(409);
-        throw new Error("The user has already read this message!")
+        throw new Error("The user has already read this message!");
     }
 
     message = await messageModel.findByIdAndUpdate(
-        messageId, 
+        messageId,
         {
             $push: { readBy: userId },
         },
         {
-            new: true
+            new: true,
         }
     );
 
     res.json({
         message,
         token: req.newToken,
-        status: "SUCCESS"
+        status: "SUCCESS",
     });
 });
 

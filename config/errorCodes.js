@@ -2,23 +2,23 @@ module.exports = {
     authErrors: {
         register: {
             fields: {
-                missed : {
+                missed: {
                     code: "AUTH_REGISTER_FIELDS_MISSED",
                     status: 400,
                     message: "Please Enter all the Feilds!",
                 },
-                invalid : {
+                invalid: {
                     code: "AUTH_REGISTER_FIELDS_INVALID",
                     status: 400,
                 },
             },
             user: {
-                exists : {
+                exists: {
                     code: "AUTH_REGISTER_USER_IEXISTS",
                     status: 400,
                     message: "User already exists!",
                 },
-                create : {
+                create: {
                     code: "AUTH_REGISTER_USER_CREATE",
                     message: "Error while creating the user!",
                 },
@@ -29,7 +29,7 @@ module.exports = {
                 code: "AUTH_LOGIN_CREDENTIALS",
                 status: 401,
                 message: "Invalid Email or Password!",
-            }
+            },
         },
         resetPasswordRequest: {
             email: {
@@ -81,8 +81,8 @@ module.exports = {
                     status: 403,
                     message: "At least one of the required roles missed!",
                 },
-            }
-        }
+            },
+        },
     },
     profileErrors: {
         notfound: {
@@ -95,5 +95,5 @@ module.exports = {
             status: 404,
             message: "Timeout - The user is not found!",
         },
-    }
-}
+    },
+};
