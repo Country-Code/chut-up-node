@@ -1,6 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const User = require("../models/usersModel");
-const tools = require('../utils/tools');
+const tools = require("../utils/tools");
 
 const getAll = asyncHandler(async (req, res) => {
     let users = await User.find();
@@ -10,8 +10,8 @@ const getAll = asyncHandler(async (req, res) => {
     res.json({
         users,
         status: "SUCCESS",
-        token: req.newToken
+        token: req.newToken,
     });
 });
 
-module.exports = {getAll}
+module.exports = { getAll };

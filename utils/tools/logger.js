@@ -1,12 +1,14 @@
 const LOG_LENGTH = 150;
-const date = require('./date');
+const date = require("./date");
 
 const Log = {
     type: "log",
     logTitle: function (title) {
         let currentDate = date.current();
         let starsLen = LOG_LENGTH - 6 - title.length - currentDate.length;
-        console[this.type](`${currentDate} === ${title} ${"*".repeat(starsLen)}`);
+        console[this.type](
+            `${currentDate} === ${title} ${"*".repeat(starsLen)}`
+        );
     },
     logLine: function () {
         console[this.type](`${"#".repeat(LOG_LENGTH)}`);
@@ -16,14 +18,13 @@ const Log = {
         console[this.type](message);
     },
     log: function (message, title = null) {
-        let loggedTitle = title ?? this.type.toUpperCase()
+        let loggedTitle = title ?? this.type.toUpperCase();
         this.logLine();
         this.logTitle(loggedTitle);
         this.logMessage(message);
         this.logLine();
-    }
-}
-
+    },
+};
 
 const logger = {
     log: () => {
@@ -32,18 +33,18 @@ const logger = {
     debug: () => {
         let debugLog = Object.create(Log);
         debugLog.type = "debug";
-        return debugLog
+        return debugLog;
     },
     info: () => {
         let infoLog = Object.create(Log);
         infoLog.type = "info";
-        return infoLog
+        return infoLog;
     },
     error: () => {
         let errorLog = Object.create(Log);
         errorLog.type = "log";
-        return errorLog
+        return errorLog;
     },
-}
+};
 
 module.exports = logger;
