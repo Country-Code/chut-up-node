@@ -107,7 +107,10 @@ const getAll = asyncHandler(async (req, res) => {
 });
 
 const create = asyncHandler(async (req, res) => {
-    if (!req.body.users || !req.body.name) {
+    const isGroupNameRequired = process.env.CHATS_IS_GROUP_NAME_REQUIRED ?? false;
+    const isNewGroupEnabled = process.env.CHATS_IS_NEW_GROUP_ENABLED ?? false;
+
+    if (!req.body.users || (isGroupNameRequired && req.body.isGroup && !req.body.name)) {
         res.status(400);
         throw new Error("Required fields are missed!");
     }
@@ -116,29 +119,42 @@ const create = asyncHandler(async (req, res) => {
 
     if (users.length < 1) {
         res.status(400);
-        throw new Error("2 users or more are required to form a group chat");
+        throw new Error(
+            "at least one user must be given to form a conversation"
+        );
     }
 
-    users.push(req.payload);
-
-    let chatGroup = await chatModel.create({
-        name: req.body.name,
-        users,
-        isGroup: true,
-        groupAdmins: req.payload,
+    users.push(req.payload._id);
+    // Remove duplicate users
+    users = Array.from(new Set(users));
+    let chat = await chatModel.findOne({
+        users: { $in: users },
+        isGroup: req.body.isGroup,
     });
 
-    chatGroup = await chatModel.findOne({ _id: chatGroup._id })
+    if (!chat || (req.body.isGroup && isNewGroupEnabled)) {
+        chat = await chatModel.create({
+            users,
+            isGroup: req.body.isGroup,
+        });
+
+        if (req.body.isGroup) {
+            chat.name = req.body.name;
+            chat.groupAdmins = req.payload._id;
+        }
+
+        await chat.save();
+    }
+
+    chatFitted = await chatModel
+        .findOne({ _id: chat._id })
         .populate("users", "-password")
         .populate("groupAdmins", "-password");
-
-    res
-        .status(201)
-        .json({
-            chatGroup,
-            token: req.newToken,
-            status: "SUCCESS"
-        });
+    res.status(201).json({
+        chat: chatFitted,
+        token: req.newToken,
+        status: "SUCCESS",
+    });
 });
 
 const rename = asyncHandler(async (req, res) => {
